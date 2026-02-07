@@ -178,8 +178,11 @@
 </div>
 
 <script>
-    /* FIXED DATE COUNTDOWN — visible + synced */
-    const targetDate = new Date("2025-04-15T00:00:00");
+window.onload = function() {
+    console.log("JS Loaded — Countdown starting");
+
+    /* FIXED DATE COUNTDOWN — March 29, 2026 */
+    const targetDate = new Date("2026-03-29T00:00:00");
 
     function updateCountdown() {
         const now = new Date();
@@ -203,7 +206,7 @@
     updateCountdown();
 
     /* Email sender */
-    function sendMail() {
+    window.sendMail = function() {
         const email = document.getElementById("emailInput").value;
         const msg = document.getElementById("msgInput").value;
 
@@ -212,7 +215,7 @@
 
         window.location.href =
             `mailto:owner@imformaltime.com?subject=Message from ${email}&body=${encodeURIComponent(msg)}%0D%0A%0D%0AFrom: ${email}`;
-    }
+    };
 
     /* Particle system */
     const container = document.getElementById('vortex-container');
@@ -263,6 +266,7 @@
         const y = (e.clientY / window.innerHeight - 0.5) * 12;
         container.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
     });
+};
 </script>
 
 </body>
