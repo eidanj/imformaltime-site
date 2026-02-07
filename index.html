@@ -67,12 +67,13 @@
             user-select: none;
         }
 
+        /* VISIBLE COUNTDOWN */
         #countdown {
             margin-top: 25px;
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 900;
             color: var(--green-dark);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 0 3px 6px rgba(0,0,0,0.15);
             z-index: 15000;
             position: relative;
         }
@@ -177,8 +178,8 @@
 </div>
 
 <script>
-    /* FIXED DATE COUNTDOWN — everyone sees the same timer */
-    const targetDate = new Date("2025-04-15T00:00:00");  // <-- CHANGE THIS DATE
+    /* FIXED DATE COUNTDOWN — visible + synced */
+    const targetDate = new Date("2025-04-15T00:00:00");
 
     function updateCountdown() {
         const now = new Date();
