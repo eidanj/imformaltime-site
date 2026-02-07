@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YIAI | The Y</title>
+    <title>imformaltime.com | Under Construction</title>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@600;800&display=swap');
 
         :root {
-            --mocha-green: #6b705c;    
-            --soft-yellow: #f4f1de;    
-            --deep-mocha: #3d405b;     
-            --accent-ochre: #e9c46a;   
-            --white-smoke: #fefae0;    
+            --green-dark: #1b3d2f;
+            --green-mid: #2e5e44;
+            --green-light: #a8d5ba;
+            --green-accent: #7ecf8a;
+            --green-bg: #e8f5e9;
         }
 
         body, html {
@@ -21,8 +22,8 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: radial-gradient(circle at center, var(--white-smoke) 0%, var(--soft-yellow) 100%);
-            color: var(--mocha-green);
+            background: radial-gradient(circle at center, var(--green-bg) 0%, var(--green-light) 100%);
+            color: var(--green-dark);
             perspective: 2000px;
         }
 
@@ -40,25 +41,25 @@
             transform: translate(-50%, -50%);
             z-index: 10000;
             text-align: center;
+            width: 90%;
         }
 
         .yiai-text {
             font-family: 'Cinzel', serif;
-            font-size: 11vw;
+            font-size: 4vw;
             font-weight: 900;
-            letter-spacing: 55px;
-            padding-left: 55px;
+            letter-spacing: 4px;
             background: linear-gradient(
-                to bottom, 
-                var(--deep-mocha) 0%, 
-                var(--mocha-green) 40%, 
-                var(--accent-ochre) 50%, 
-                var(--mocha-green) 60%, 
-                var(--deep-mocha) 100%
+                to bottom,
+                var(--green-dark),
+                var(--green-mid),
+                var(--green-accent),
+                var(--green-mid),
+                var(--green-dark)
             );
             background-size: 200% 200%;
             -webkit-background-clip: text;
-            background-clip: text; 
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: texture-shift 12s ease-in-out infinite, breath 8s ease-in-out infinite;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
@@ -105,26 +106,29 @@
         }
     </style>
 </head>
+
 <body>
 
 <div class="film-grain"></div>
 
 <div id="vortex-container">
     <div class="yiai-anchor">
-        <h1 class="yiai-text">YIAI</h1>
-        <p style="color: var(--mocha-green); letter-spacing: 25px; font-size: 0.9rem; font-weight: 400; opacity: 0.6; margin-top: -40px;">Y I C</p>
+        <h1 class="yiai-text">
+            imformaltime.com is under construction!<br>
+            Might be finished in 10–50 days.
+        </h1>
     </div>
 </div>
 
 <script>
     const container = document.getElementById('vortex-container');
-    const spiritCount = 450; 
+    const spiritCount = 450;
 
     function spawnSpirit() {
         const el = document.createElement('div');
         el.className = 'spirit';
-        el.innerText = 'YIAI';
-        
+        el.innerText = 'IMFT';
+
         const sx = (Math.random() * 240 - 120) + "vw";
         const sy = (Math.random() * 240 - 120) + "vh";
         const sz = (Math.random() * -1500 - 200) + "px";
@@ -135,8 +139,8 @@
 
         const dur = Math.random() * 12 + 18 + "s";
         const del = Math.random() * -30 + "s";
-        
-        const op = Math.random() * 0.4 + 0.2; 
+
+        const op = Math.random() * 0.4 + 0.2;
 
         el.style.setProperty('--sx', sx);
         el.style.setProperty('--sy', sy);
@@ -145,12 +149,12 @@
         el.style.setProperty('--ey', ey);
         el.style.setProperty('--ez', ez);
         el.style.setProperty('--max-op', op);
-        
+
         el.style.fontSize = (Math.random() * 1.2 + 0.6) + 'rem';
-        
-        el.style.color = Math.random() > 0.85 ? 'var(--accent-ochre)' : 'var(--mocha-green)';
+
+        el.style.color = Math.random() > 0.85 ? 'var(--green-accent)' : 'var(--green-mid)';
         el.style.animation = `orbital-stream ${dur} linear ${del} infinite`;
-        
+
         const zValue = parseInt(sz);
         el.style.filter = `blur(${Math.abs(zValue/300)}px)`;
 
