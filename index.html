@@ -1,11 +1,172 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Imformal Time</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YIAI | The Y</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@600;800&display=swap');
+
+        :root {
+            --mocha-green: #6b705c;    
+            --soft-yellow: #f4f1de;    
+            --deep-mocha: #3d405b;     
+            --accent-ochre: #e9c46a;   
+            --white-smoke: #fefae0;    
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at center, var(--white-smoke) 0%, var(--soft-yellow) 100%);
+            color: var(--mocha-green);
+            perspective: 2000px;
+        }
+
+        #vortex-container {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            transform-style: preserve-3d;
+        }
+
+        .yiai-anchor {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            text-align: center;
+        }
+
+        .yiai-text {
+            font-family: 'Cinzel', serif;
+            font-size: 11vw;
+            font-weight: 900;
+            letter-spacing: 55px;
+            padding-left: 55px;
+            background: linear-gradient(
+                to bottom, 
+                var(--deep-mocha) 0%, 
+                var(--mocha-green) 40%, 
+                var(--accent-ochre) 50%, 
+                var(--mocha-green) 60%, 
+                var(--deep-mocha) 100%
+            );
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            animation: texture-shift 12s ease-in-out infinite, breath 8s ease-in-out infinite;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
+            user-select: none;
+        }
+
+        .spirit {
+            position: absolute;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            will-change: transform, opacity;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        @keyframes texture-shift {
+            0%, 100% { background-position: 50% 0%; }
+            50% { background-position: 50% 100%; }
+        }
+
+        @keyframes breath {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes orbital-stream {
+            0% { transform: translate3d(var(--sx), var(--sy), var(--sz)) rotate(0deg); opacity: 0; }
+            10% { opacity: var(--max-op); }
+            90% { opacity: var(--max-op); }
+            100% { transform: translate3d(var(--ex), var(--ey), var(--ez)) rotate(20deg); opacity: 0; }
+        }
+
+        .film-grain {
+            position: fixed;
+            inset: 0;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 20000;
+            mix-blend-mode: overlay;
+        }
+    </style>
 </head>
 <body>
-  <h1>Imformal Time</h1>
-  <p>New site coming together on Netlify.</p>
+
+<div class="film-grain"></div>
+
+<div id="vortex-container">
+    <div class="yiai-anchor">
+        <h1 class="yiai-text">YIAI</h1>
+        <p style="color: var(--mocha-green); letter-spacing: 25px; font-size: 0.9rem; font-weight: 400; opacity: 0.6; margin-top: -40px;">Y I C</p>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('vortex-container');
+    const spiritCount = 450; 
+
+    function spawnSpirit() {
+        const el = document.createElement('div');
+        el.className = 'spirit';
+        el.innerText = 'YIAI';
+        
+        const sx = (Math.random() * 240 - 120) + "vw";
+        const sy = (Math.random() * 240 - 120) + "vh";
+        const sz = (Math.random() * -1500 - 200) + "px";
+
+        const ex = (Math.random() * 120 - 60) + "vw";
+        const ey = (Math.random() * 120 - 60) + "vh";
+        const ez = "800px";
+
+        const dur = Math.random() * 12 + 18 + "s";
+        const del = Math.random() * -30 + "s";
+        
+        const op = Math.random() * 0.4 + 0.2; 
+
+        el.style.setProperty('--sx', sx);
+        el.style.setProperty('--sy', sy);
+        el.style.setProperty('--sz', sz);
+        el.style.setProperty('--ex', ex);
+        el.style.setProperty('--ey', ey);
+        el.style.setProperty('--ez', ez);
+        el.style.setProperty('--max-op', op);
+        
+        el.style.fontSize = (Math.random() * 1.2 + 0.6) + 'rem';
+        
+        el.style.color = Math.random() > 0.85 ? 'var(--accent-ochre)' : 'var(--mocha-green)';
+        el.style.animation = `orbital-stream ${dur} linear ${del} infinite`;
+        
+        const zValue = parseInt(sz);
+        el.style.filter = `blur(${Math.abs(zValue/300)}px)`;
+
+        container.appendChild(el);
+    }
+
+    for (let i = 0; i < spiritCount; i++) {
+        spawnSpirit();
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 12;
+        const y = (e.clientY / window.innerHeight - 0.5) * 12;
+        container.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
+    });
+</script>
+
 </body>
 </html>
