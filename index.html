@@ -67,7 +67,6 @@
             user-select: none;
         }
 
-        /* Countdown styling */
         #countdown {
             margin-top: 20px;
             font-size: 1.4vw;
@@ -114,18 +113,20 @@
             mix-blend-mode: overlay;
         }
 
-        /* Email field bottom-right */
+        /* Email + message box */
         #email-box {
             position: fixed;
             bottom: 20px;
             right: 20px;
             background: var(--green-light);
-            padding: 12px 16px;
-            border-radius: 10px;
+            padding: 14px 18px;
+            border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             display: flex;
+            flex-direction: column;
             gap: 8px;
             z-index: 30000;
+            width: 240px;
         }
 
         #email-box input {
@@ -166,16 +167,16 @@
     </div>
 </div>
 
-<!-- Email box -->
+<!-- Email + message box -->
 <div id="email-box">
     <input type="email" id="emailInput" placeholder="Your email">
-    <button onclick="sendMail()">Mail Me</button>
+    <input type="text" id="msgInput" placeholder="Your message">
+    <button onclick="sendMail()">Send</button>
 </div>
 
 <script>
-    /* Countdown Timer */
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 50); // 50-day max window
+    /* FIXED DATE COUNTDOWN — everyone sees the same timer */
+    const targetDate = new Date("2025-04-15T00:00:00");  // <-- CHANGE THIS DATE
 
     function updateCountdown() {
         const now = new Date();
@@ -200,9 +201,13 @@
     /* Email sender */
     function sendMail() {
         const email = document.getElementById("emailInput").value;
-        if (!email) return alert("Please enter your email first.");
+        const msg = document.getElementById("msgInput").value;
 
-        window.location.href = `mailto:owner@imformaltime.com?subject=Notify me&body=Please notify me when the site is ready.%0D%0AMy email: ${email}`;
+        if (!email) return alert("Please enter your email.");
+        if (!msg) return alert("Please enter a message.");
+
+        window.location.href =
+            `mailto:owner@imformaltime.com?subject=Message from ${email}&body=${encodeURIComponent(msg)}%0D%0A%0D%0AFrom: ${email}`;
     }
 
     /* Particle system */
