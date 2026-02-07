@@ -25,6 +25,7 @@
             background: radial-gradient(circle at center, var(--green-bg) 0%, var(--green-light) 100%);
             color: var(--green-dark);
             perspective: 2000px;
+            font-family: 'Montserrat', sans-serif;
         }
 
         #vortex-container {
@@ -38,7 +39,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -60%);
             z-index: 10000;
             text-align: center;
             width: 90%;
@@ -66,9 +67,17 @@
             user-select: none;
         }
 
+        /* Countdown styling */
+        #countdown {
+            margin-top: 20px;
+            font-size: 1.4vw;
+            font-weight: 600;
+            color: var(--green-mid);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
         .spirit {
             position: absolute;
-            font-family: 'Montserrat', sans-serif;
             font-weight: 800;
             text-transform: uppercase;
             white-space: nowrap;
@@ -104,6 +113,41 @@
             z-index: 20000;
             mix-blend-mode: overlay;
         }
+
+        /* Email field bottom-right */
+        #email-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--green-light);
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            display: flex;
+            gap: 8px;
+            z-index: 30000;
+        }
+
+        #email-box input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--green-mid);
+            outline: none;
+        }
+
+        #email-box button {
+            padding: 8px 12px;
+            background: var(--green-mid);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        #email-box button:hover {
+            background: var(--green-dark);
+        }
     </style>
 </head>
 
@@ -117,10 +161,51 @@
             imformaltime.com is under construction!<br>
             Might be finished in 10–50 days.
         </h1>
+
+        <div id="countdown">Loading countdown…</div>
     </div>
 </div>
 
+<!-- Email box -->
+<div id="email-box">
+    <input type="email" id="emailInput" placeholder="Your email">
+    <button onclick="sendMail()">Mail Me</button>
+</div>
+
 <script>
+    /* Countdown Timer */
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + 50); // 50-day max window
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            document.getElementById("countdown").innerText = "The site may be ready any moment now!";
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+        document.getElementById("countdown").innerText =
+            `${days} days, ${hours} hours, ${minutes} minutes remaining`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    /* Email sender */
+    function sendMail() {
+        const email = document.getElementById("emailInput").value;
+        if (!email) return alert("Please enter your email first.");
+
+        window.location.href = `mailto:owner@imformaltime.com?subject=Notify me&body=Please notify me when the site is ready.%0D%0AMy email: ${email}`;
+    }
+
+    /* Particle system */
     const container = document.getElementById('vortex-container');
     const spiritCount = 450;
 
@@ -151,7 +236,6 @@
         el.style.setProperty('--max-op', op);
 
         el.style.fontSize = (Math.random() * 1.2 + 0.6) + 'rem';
-
         el.style.color = Math.random() > 0.85 ? 'var(--green-accent)' : 'var(--green-mid)';
         el.style.animation = `orbital-stream ${dur} linear ${del} infinite`;
 
