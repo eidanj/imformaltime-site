@@ -68,11 +68,13 @@
         }
 
         #countdown {
-            margin-top: 20px;
-            font-size: 1.4vw;
-            font-weight: 600;
-            color: var(--green-mid);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-top: 25px;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--green-dark);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 15000;
+            position: relative;
         }
 
         .spirit {
@@ -183,7 +185,8 @@
         const diff = targetDate - now;
 
         if (diff <= 0) {
-            document.getElementById("countdown").innerText = "The site may be ready any moment now!";
+            document.getElementById("countdown").innerText =
+                "The site may be ready any moment now!";
             return;
         }
 
@@ -192,7 +195,7 @@
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
 
         document.getElementById("countdown").innerText =
-            `${days} days, ${hours} hours, ${minutes} minutes remaining`;
+            `${days} days • ${hours} hours • ${minutes} minutes remaining`;
     }
 
     setInterval(updateCountdown, 1000);
