@@ -67,7 +67,6 @@
             user-select: none;
         }
 
-        /* VISIBLE COUNTDOWN */
         #countdown {
             margin-top: 25px;
             font-size: 3rem;
@@ -116,7 +115,6 @@
             mix-blend-mode: overlay;
         }
 
-        /* Email + message box */
         #email-box {
             position: fixed;
             bottom: 20px;
@@ -166,11 +164,23 @@
             Might be finished in 10–50 days.
         </h1>
 
+        <!-- ⭐ NEW YOUTUBE LINK (small red text) -->
+        <div style="
+            font-size: 0.9rem;
+            color: red;
+            margin-top: 8px;
+            font-weight: 700;
+        ">
+            <a href="https://www.youtube.com/@letsGame0925" 
+               style="color: red; text-decoration: none;">
+               youtube.com/@letsGame0925
+            </a>
+        </div>
+
         <div id="countdown">Loading countdown…</div>
     </div>
 </div>
 
-<!-- Email + message box -->
 <div id="email-box">
     <input type="email" id="emailInput" placeholder="Your email">
     <input type="text" id="msgInput" placeholder="Your message">
@@ -181,7 +191,6 @@
 window.onload = function() {
     console.log("JS Loaded — Countdown starting");
 
-    /* FIXED DATE COUNTDOWN — March 29, 2026 */
     const targetDate = new Date("2026-03-29T00:00:00");
 
     function updateCountdown() {
@@ -205,7 +214,6 @@ window.onload = function() {
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    /* Email sender */
     window.sendMail = function() {
         const email = document.getElementById("emailInput").value;
         const msg = document.getElementById("msgInput").value;
@@ -217,7 +225,6 @@ window.onload = function() {
             `mailto:owner@imformaltime.com?subject=Message from ${email}&body=${encodeURIComponent(msg)}%0D%0A%0D%0AFrom: ${email}`;
     };
 
-    /* Particle system */
     const container = document.getElementById('vortex-container');
     const spiritCount = 450;
 
@@ -270,4 +277,4 @@ window.onload = function() {
 </script>
 
 </body>
-</html> 
+</html>
