@@ -77,7 +77,6 @@
             position: relative;
         }
 
-        /* Game button */
         #gameButton {
             margin-top: 20px;
             padding: 12px 22px;
@@ -95,7 +94,6 @@
             transform: scale(1.05);
         }
 
-        /* Game modal */
         #gameModal {
             position: fixed;
             inset: 0;
@@ -194,7 +192,6 @@
     </div>
 </div>
 
-<!-- Game Modal -->
 <div id="gameModal">
     <div id="closeGame">✖</div>
     <div id="gameContainer">
@@ -250,12 +247,14 @@ const modal = document.getElementById("gameModal");
 document.getElementById("gameButton").onclick = () => modal.style.display = "flex";
 document.getElementById("closeGame").onclick = () => modal.style.display = "none";
 
-/* ORIGINAL, NON-COPYRIGHTED FLAPPY GAME */
+/* GAME */
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let birdY = 300, birdX = 80, vel = 0;
-const gravity = 0.4, flap = -7;
+const gravity = 0.55;
+const flap = -9;
+
 let pipes = [];
 let score = 0, best = 0;
 let started = false, over = false;
@@ -271,7 +270,7 @@ function reset() {
 }
 
 function spawnPipe() {
-    const gap = 140;
+    const gap = 190;
     const top = Math.random() * 250 + 50;
     pipes.push({ x: 400, top });
 }
@@ -282,7 +281,7 @@ function update() {
     vel += gravity;
     birdY += vel;
 
-    pipes.forEach(p => p.x -= 2);
+    pipes.forEach(p => p.x -= 3.5);
     pipes = pipes.filter(p => p.x > -60);
 
     if (performance.now() - lastPipe > 1500) {
@@ -299,7 +298,7 @@ function update() {
 
         const hitX = birdX + 15 > p.x && birdX - 15 < p.x + 60;
         const hitTop = birdY - 15 < p.top;
-        const hitBottom = birdY + 15 > p.top + 140;
+        const hitBottom = birdY + 15 > p.top + 190;
 
         if (hitX && (hitTop || hitBottom)) over = true;
     });
@@ -314,7 +313,7 @@ function draw() {
     ctx.fillStyle = "#3a8f3a";
     pipes.forEach(p => {
         ctx.fillRect(p.x, 0, 60, p.top);
-        ctx.fillRect(p.x, p.top + 140, 60, 600);
+        ctx.fillRect(p.x, p.top + 190, 60, 600);
     });
 
     ctx.fillStyle = "yellow";
