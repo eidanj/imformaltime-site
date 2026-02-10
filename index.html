@@ -33,6 +33,18 @@
             width: 100vw;
             height: 100vh;
             transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+        .imft {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.25));
+            transition: transform 0.1s linear;
         }
 
         .yiai-anchor {
@@ -173,23 +185,23 @@
 
 <div class="film-grain"></div>
 
-<div id="vortex-container">
-    <div class="yiai-anchor">
-        <h1 class="yiai-text">
-            imformaltime.com is under construction!<br>
-            Might be finished in 10–50 days.
-        </h1>
+<div id="vortex-container"></div>
 
-        <div style="font-size: 0.9rem; color: red; margin-top: 8px; font-weight: 700;">
-            <a href="https://www.youtube.com/@letsGame0925" style="color: red; text-decoration: none;">
-                youtube.com/@letsGame0925
-            </a>
-        </div>
+<div class="yiai-anchor">
+    <h1 class="yiai-text">
+        imformaltime.com is under construction!<br>
+        Might be finished in 10–50 days.
+    </h1>
 
-        <button id="gameButton">Play some games in the meantime!</button>
-
-        <div id="countdown">Loading countdown…</div>
+    <div style="font-size: 0.9rem; color: red; margin-top: 8px; font-weight: 700;">
+        <a href="https://www.youtube.com/@letsGame0925" style="color: red; text-decoration: none;">
+            youtube.com/@letsGame0925
+        </a>
     </div>
+
+    <button id="gameButton">Play some games in the meantime!</button>
+
+    <div id="countdown">Loading countdown…</div>
 </div>
 
 <div id="gameModal">
@@ -359,6 +371,55 @@ window.addEventListener("keydown", e => {
 });
 canvas.addEventListener("mousedown", flapBird);
 canvas.addEventListener("touchstart", flapBird);
+
+/* IMFT FLOATING PARTICLES */
+const vortex = document.getElementById("vortex-container");
+const particleCount = 40;
+const particles = [];
+
+for (let i = 0; i < particleCount; i++) {
+    const p = document.createElement("div");
+    p.className = "imft";
+    p.style.backgroundImage = "url('IMFTs/imft.png')";
+    p.style.opacity = Math.random() * 0.7 + 0.3;
+    p.style.transform = `translate3d(${Math.random()*100}vw, ${Math.random()*100}vh, ${Math.random()*800 - 400}px)`;
+    vortex.appendChild(p);
+
+    particles.push({
+        el: p,
+        x: Math.random()*100,
+        y: Math.random()*100,
+        z: Math.random()*800 - 400,
+        rx: Math.random()*360,
+        ry: Math.random()*360,
+        speed: Math.random()*0.3 + 0.1
+    });
+}
+
+let mouseX = 0, mouseY = 0;
+
+window.addEventListener("mousemove", e => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+function animateIMFTs() {
+    particles.forEach(p => {
+        p.ry += p.speed;
+        p.rx += p.speed * 0.6;
+
+        const x = p.x + mouseX * 20;
+        const y = p.y + mouseY * 20;
+
+        p.el.style.transform =
+            `translate3d(${x}vw, ${y}vh, ${p.z}px)
+             rotateX(${p.rx}deg)
+             rotateY(${p.ry}deg)`;
+    });
+
+    requestAnimationFrame(animateIMFTs);
+}
+animateIMFTs();
 </script>
 
 </body>
