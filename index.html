@@ -77,32 +77,50 @@
             position: relative;
         }
 
-        .spirit {
-            position: absolute;
+        /* Game button */
+        #gameButton {
+            margin-top: 20px;
+            padding: 12px 22px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
             font-weight: 800;
-            text-transform: uppercase;
-            white-space: nowrap;
-            pointer-events: none;
-            will-change: transform, opacity;
-            letter-spacing: 3px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        #gameButton:hover {
+            background: #cc0000;
+            transform: scale(1.05);
         }
 
-        @keyframes texture-shift {
-            0%, 100% { background-position: 50% 0%; }
-            50% { background-position: 50% 100%; }
+        /* Game modal */
+        #gameModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50000;
         }
 
-        @keyframes breath {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        #gameContainer {
+            background: #222;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
 
-        @keyframes orbital-stream {
-            0% { transform: translate3d(var(--sx), var(--sy), var(--sz)) rotate(0deg); opacity: 0; }
-            10% { opacity: var(--max-op); }
-            90% { opacity: var(--max-op); }
-            100% { transform: translate3d(var(--ex), var(--ey), var(--ez)) rotate(20deg); opacity: 0; }
+        #closeGame {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            font-weight: 900;
         }
 
         .film-grain {
@@ -164,20 +182,23 @@
             Might be finished in 10–50 days.
         </h1>
 
-        <!-- ⭐ NEW YOUTUBE LINK (small red text) -->
-        <div style="
-            font-size: 0.9rem;
-            color: red;
-            margin-top: 8px;
-            font-weight: 700;
-        ">
-            <a href="https://www.youtube.com/@letsGame0925" 
-               style="color: red; text-decoration: none;">
-               youtube.com/@letsGame0925
+        <div style="font-size: 0.9rem; color: red; margin-top: 8px; font-weight: 700;">
+            <a href="https://www.youtube.com/@letsGame0925" style="color: red; text-decoration: none;">
+                youtube.com/@letsGame0925
             </a>
         </div>
 
+        <button id="gameButton">Play some games in the meantime!</button>
+
         <div id="countdown">Loading countdown…</div>
+    </div>
+</div>
+
+<!-- Game Modal -->
+<div id="gameModal">
+    <div id="closeGame">✖</div>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
     </div>
 </div>
 
@@ -188,9 +209,8 @@
 </div>
 
 <script>
+/* COUNTDOWN */
 window.onload = function() {
-    console.log("JS Loaded — Countdown starting");
-
     const targetDate = new Date("2026-03-29T00:00:00");
 
     function updateCountdown() {
@@ -198,82 +218,148 @@ window.onload = function() {
         const diff = targetDate - now;
 
         if (diff <= 0) {
-            document.getElementById("countdown").innerText =
-                "The site may be ready any moment now!";
+            countdown.innerText = "The site may be ready any moment now!";
             return;
         }
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff / 3600000) % 24);
+        const minutes = Math.floor((diff / 60000) % 60);
 
-        document.getElementById("countdown").innerText =
-            `${days} days • ${hours} hours • ${minutes} minutes remaining`;
+        countdown.innerText = `${days} days • ${hours} hours • ${minutes} minutes remaining`;
     }
 
     setInterval(updateCountdown, 1000);
     updateCountdown();
-
-    window.sendMail = function() {
-        const email = document.getElementById("emailInput").value;
-        const msg = document.getElementById("msgInput").value;
-
-        if (!email) return alert("Please enter your email.");
-        if (!msg) return alert("Please enter a message.");
-
-        window.location.href =
-            `mailto:owner@imformaltime.com?subject=Message from ${email}&body=${encodeURIComponent(msg)}%0D%0A%0D%0AFrom: ${email}`;
-    };
-
-    const container = document.getElementById('vortex-container');
-    const spiritCount = 450;
-
-    function spawnSpirit() {
-        const el = document.createElement('div');
-        el.className = 'spirit';
-        el.innerText = 'IMFT';
-
-        const sx = (Math.random() * 240 - 120) + "vw";
-        const sy = (Math.random() * 240 - 120) + "vh";
-        const sz = (Math.random() * -1500 - 200) + "px";
-
-        const ex = (Math.random() * 120 - 60) + "vw";
-        const ey = (Math.random() * 120 - 60) + "vh";
-        const ez = "800px";
-
-        const dur = Math.random() * 12 + 18 + "s";
-        const del = Math.random() * -30 + "s";
-
-        const op = Math.random() * 0.4 + 0.2;
-
-        el.style.setProperty('--sx', sx);
-        el.style.setProperty('--sy', sy);
-        el.style.setProperty('--sz', sz);
-        el.style.setProperty('--ex', ex);
-        el.style.setProperty('--ey', ey);
-        el.style.setProperty('--ez', ez);
-        el.style.setProperty('--max-op', op);
-
-        el.style.fontSize = (Math.random() * 1.2 + 0.6) + 'rem';
-        el.style.color = Math.random() > 0.85 ? 'var(--green-accent)' : 'var(--green-mid)';
-        el.style.animation = `orbital-stream ${dur} linear ${del} infinite`;
-
-        const zValue = parseInt(sz);
-        el.style.filter = `blur(${Math.abs(zValue/300)}px)`;
-
-        container.appendChild(el);
-    }
-
-    for (let i = 0; i < spiritCount; i++) {
-        spawnSpirit();
-    }
-
-    document.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 12;
-        const y = (e.clientY / window.innerHeight - 0.5) * 12;
-        container.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
-    });
 };
+
+/* EMAIL */
+function sendMail() {
+    const email = emailInput.value;
+    const msg = msgInput.value;
+
+    if (!email) return alert("Please enter your email.");
+    if (!msg) return alert("Please enter a message.");
+
+    window.location.href =
+        `mailto:owner@imformaltime.com?subject=Message from ${email}&body=${encodeURIComponent(msg)}%0D%0A%0D%0AFrom: ${email}`;
+}
+
+/* GAME POPUP */
+const modal = document.getElementById("gameModal");
+document.getElementById("gameButton").onclick = () => modal.style.display = "flex";
+document.getElementById("closeGame").onclick = () => modal.style.display = "none";
+
+/* ORIGINAL, NON-COPYRIGHTED FLAPPY GAME */
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let birdY = 300, birdX = 80, vel = 0;
+const gravity = 0.4, flap = -7;
+let pipes = [];
+let score = 0, best = 0;
+let started = false, over = false;
+let lastPipe = 0;
+
+function reset() {
+    birdY = 300;
+    vel = 0;
+    pipes = [];
+    score = 0;
+    over = false;
+    started = false;
+}
+
+function spawnPipe() {
+    const gap = 140;
+    const top = Math.random() * 250 + 50;
+    pipes.push({ x: 400, top });
+}
+
+function update() {
+    if (!started || over) return;
+
+    vel += gravity;
+    birdY += vel;
+
+    pipes.forEach(p => p.x -= 2);
+    pipes = pipes.filter(p => p.x > -60);
+
+    if (performance.now() - lastPipe > 1500) {
+        spawnPipe();
+        lastPipe = performance.now();
+    }
+
+    pipes.forEach(p => {
+        if (birdX > p.x + 60 && !p.passed) {
+            p.passed = true;
+            score++;
+            best = Math.max(best, score);
+        }
+
+        const hitX = birdX + 15 > p.x && birdX - 15 < p.x + 60;
+        const hitTop = birdY - 15 < p.top;
+        const hitBottom = birdY + 15 > p.top + 140;
+
+        if (hitX && (hitTop || hitBottom)) over = true;
+    });
+
+    if (birdY > 600 || birdY < 0) over = true;
+}
+
+function draw() {
+    ctx.fillStyle = "#70c5ce";
+    ctx.fillRect(0, 0, 400, 600);
+
+    ctx.fillStyle = "#3a8f3a";
+    pipes.forEach(p => {
+        ctx.fillRect(p.x, 0, 60, p.top);
+        ctx.fillRect(p.x, p.top + 140, 60, 600);
+    });
+
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(birdX, birdY, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "white";
+    ctx.font = "28px Arial";
+    ctx.fillText(score, 200, 60);
+
+    if (!started) {
+        ctx.font = "20px Arial";
+        ctx.fillText("Click or SPACE to start", 200, 300);
+    }
+
+    if (over) {
+        ctx.font = "28px Arial";
+        ctx.fillText("Game Over", 200, 280);
+        ctx.font = "20px Arial";
+        ctx.fillText("Click or SPACE to restart", 200, 320);
+    }
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+loop();
+
+function flapBird() {
+    if (!started) {
+        started = true;
+        lastPipe = performance.now();
+    }
+    if (over) return reset();
+    vel = flap;
+}
+
+window.addEventListener("keydown", e => {
+    if (e.code === "Space") flapBird();
+});
+canvas.addEventListener("mousedown", flapBird);
+canvas.addEventListener("touchstart", flapBird);
 </script>
 
 </body>
