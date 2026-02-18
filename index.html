@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>imformaltime.com | Under Construction</title>
+    <title>IMFT | Under Construction</title>
+
+    <!-- ⭐ reCAPTCHA v3 script with YOUR SITE KEY -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lf3XXAsAAAAAChuvJqCCoyL8GwS2y1B5tTIRqHY"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@600;800&display=swap');
@@ -33,106 +36,73 @@
             width: 100vw;
             height: 100vh;
             transform-style: preserve-3d;
-            overflow: hidden;
         }
 
-        .imft {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            pointer-events: none;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.25));
-            transition: transform 0.1s linear;
-        }
-
+        /* CENTER TEXT */
         .yiai-anchor {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -60%);
+            transform: translate(-50%, -50%);
             z-index: 10000;
             text-align: center;
-            width: 90%;
         }
 
         .yiai-text {
             font-family: 'Cinzel', serif;
-            font-size: 4vw;
+            font-size: 11vw;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 55px;
+            padding-left: 55px;
             background: linear-gradient(
-                to bottom,
-                var(--green-dark),
-                var(--green-mid),
-                var(--green-accent),
-                var(--green-mid),
-                var(--green-dark)
+                to bottom, 
+                var(--green-dark) 0%, 
+                var(--green-mid) 40%, 
+                var(--green-accent) 50%, 
+                var(--green-mid) 60%, 
+                var(--green-dark) 100%
             );
             background-size: 200% 200%;
             -webkit-background-clip: text;
-            background-clip: text;
+            background-clip: text; 
             -webkit-text-fill-color: transparent;
             animation: texture-shift 12s ease-in-out infinite, breath 8s ease-in-out infinite;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
             user-select: none;
         }
 
-        #countdown {
-            margin-top: 25px;
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--green-dark);
-            text-shadow: 0 3px 6px rgba(0,0,0,0.15);
-            z-index: 15000;
-            position: relative;
-        }
-
-        #gameButton {
-            margin-top: 20px;
-            padding: 12px 22px;
-            background: #ff4444;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        #gameButton:hover {
-            background: #cc0000;
-            transform: scale(1.05);
-        }
-
-        #gameModal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 50000;
-        }
-
-        #gameContainer {
-            background: #222;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-
-        #closeGame {
+        /* PARTICLES */
+        .spirit {
             position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 2rem;
-            color: white;
-            cursor: pointer;
-            font-weight: 900;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            will-change: transform, opacity;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
+        /* ANIMATIONS */
+        @keyframes texture-shift {
+            0%, 100% { background-position: 50% 0%; }
+            50% { background-position: 50% 100%; }
+        }
+
+        @keyframes breath {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes orbital-stream {
+            0% { transform: translate3d(var(--sx), var(--sy), var(--sz)) rotate(0deg); opacity: 0; }
+            10% { opacity: var(--max-op); }
+            90% { opacity: var(--max-op); }
+            100% { transform: translate3d(var(--ex), var(--ey), var(--ez)) rotate(20deg); opacity: 0; }
+        }
+
+        /* FILM GRAIN */
         .film-grain {
             position: fixed;
             inset: 0;
@@ -143,6 +113,7 @@
             mix-blend-mode: overlay;
         }
 
+        /* EMAIL BOX */
         #email-box {
             position: fixed;
             bottom: 20px;
@@ -178,6 +149,25 @@
         #email-box button:hover {
             background: var(--green-dark);
         }
+
+        /* CAPTCHA POPUP */
+        #captchaModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+        }
+
+        #captchaBox {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 300px;
+        }
     </style>
 </head>
 
@@ -185,241 +175,121 @@
 
 <div class="film-grain"></div>
 
-<div id="vortex-container"></div>
-
-<div class="yiai-anchor">
-    <h1 class="yiai-text">
-        imformaltime.com is under construction!<br>
-        Might be finished in 10–50 days.
-    </h1>
-
-    <div style="font-size: 0.9rem; color: red; margin-top: 8px; font-weight: 700;">
-        <a href="https://www.youtube.com/@letsGame0925" style="color: red; text-decoration: none;">
-            youtube.com/@letsGame0925
-        </a>
-    </div>
-
-    <button id="gameButton">Play some games in the meantime!</button>
-
-    <div id="countdown">Loading countdown…</div>
-</div>
-
-<div id="gameModal">
-    <div id="closeGame">✖</div>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="400" height="600"></canvas>
+<div id="vortex-container">
+    <div class="yiai-anchor">
+        <h1 class="yiai-text">IMFT</h1>
+        <p style="color: var(--green-mid); letter-spacing: 25px; font-size: 0.9rem; font-weight: 400; opacity: 0.6; margin-top: -40px;">I M F T</p>
     </div>
 </div>
 
+<!-- EMAIL BOX -->
 <div id="email-box">
     <input type="email" id="emailInput" placeholder="Your email">
     <input type="text" id="msgInput" placeholder="Your message">
     <button onclick="sendMail()">Send</button>
 </div>
 
+<!-- CAPTCHA POPUP -->
+<div id="captchaModal">
+    <div id="captchaBox">
+        <h3>Verify you're human</h3>
+        <div id="captchaStatus" style="margin: 10px 0; font-weight: bold;"></div>
+        <button id="captchaButton" style="
+            padding: 10px 15px;
+            background: #2e5e44;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        ">Verify</button>
+    </div>
+</div>
+
 <script>
-/* COUNTDOWN */
-window.onload = function() {
-    const targetDate = new Date("2026-03-29T00:00:00");
+/* EMAIL + CAPTCHA */
+let pendingEmail = "";
+let pendingMsg = "";
 
-    function updateCountdown() {
-        const now = new Date();
-        const diff = targetDate - now;
+function sendMail() {
+    pendingEmail = emailInput.value;
+    pendingMsg = msgInput.value;
 
-        if (diff <= 0) {
-            countdown.innerText = "The site may be ready any moment now!";
-            return;
-        }
+    if (!pendingEmail) return alert("Please enter your email.");
+    if (!pendingMsg) return alert("Please enter a message.");
 
-        const days = Math.floor(diff / 86400000);
-        const hours = Math.floor((diff / 3600000) % 24);
-        const minutes = Math.floor((diff / 60000) % 60);
+    document.getElementById("captchaModal").style.display = "flex";
+}
 
-        countdown.innerText = `${days} days • ${hours} hours • ${minutes} minutes remaining`;
-    }
+document.getElementById("captchaButton").onclick = function () {
+    document.getElementById("captchaStatus").innerText = "Checking...";
 
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+    grecaptcha.ready(function () {
+        grecaptcha.execute("6Lf3XXAsAAAAAChuvJqCCoyL8GwS2y1B5tTIRqHY", { action: "submit" }).then(function (token) {
+
+            if (!token) {
+                document.getElementById("captchaStatus").innerText = "Verification failed.";
+                return;
+            }
+
+            document.getElementById("captchaModal").style.display = "none";
+
+            window.location.href =
+                `mailto:owner@imformaltime.com?subject=Message from ${pendingEmail}&body=${encodeURIComponent(pendingMsg)}%0D%0A%0D%0AFrom: ${pendingEmail}`;
+        });
+    });
 };
 
-/* EMAIL */
-function sendMail() {
-    const email = emailInput.value;
-    const msg = msgInput.value;
+/* PARTICLE SYSTEM */
+const container = document.getElementById('vortex-container');
+const spiritCount = 450;
 
-    if (!email) return alert("Please enter your email.");
-    if (!msg) return alert("Please enter a message.");
+function spawnSpirit() {
+    const el = document.createElement('div');
+    el.className = 'spirit';
+    el.innerText = 'IMFT';
 
-    window.location.href =
-        `mailto:owner@imformaltime.com?subject=Message from ${email}&body=${encodeURIComponent(msg)}%0D%0A%0D%0AFrom: ${email}`;
+    const sx = (Math.random() * 240 - 120) + "vw";
+    const sy = (Math.random() * 240 - 120) + "vh";
+    const sz = (Math.random() * -1500 - 200) + "px";
+
+    const ex = (Math.random() * 120 - 60) + "vw";
+    const ey = (Math.random() * 120 - 60) + "vh";
+    const ez = "800px";
+
+    const dur = Math.random() * 12 + 18 + "s";
+    const del = Math.random() * -30 + "s";
+
+    const op = Math.random() * 0.4 + 0.2;
+
+    el.style.setProperty('--sx', sx);
+    el.style.setProperty('--sy', sy);
+    el.style.setProperty('--sz', sz);
+    el.style.setProperty('--ex', ex);
+    el.style.setProperty('--ey', ey);
+    el.style.setProperty('--ez', ez);
+    el.style.setProperty('--max-op', op);
+
+    el.style.fontSize = (Math.random() * 1.2 + 0.6) + 'rem';
+
+    el.style.color = Math.random() > 0.85 ? 'var(--green-accent)' : 'var(--green-mid)';
+    el.style.animation = `orbital-stream ${dur} linear ${del} infinite`;
+
+    const zValue = parseInt(sz);
+    el.style.filter = `blur(${Math.abs(zValue/300)}px)`;
+
+    container.appendChild(el);
 }
 
-/* GAME POPUP */
-const modal = document.getElementById("gameModal");
-document.getElementById("gameButton").onclick = () => modal.style.display = "flex";
-document.getElementById("closeGame").onclick = () => modal.style.display = "none";
-
-/* GAME */
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-let birdY = 300, birdX = 80, vel = 0;
-const gravity = 0.55;
-const flap = -9;
-
-let pipes = [];
-let score = 0, best = 0;
-let started = false, over = false;
-let lastPipe = 0;
-
-function reset() {
-    birdY = 300;
-    vel = 0;
-    pipes = [];
-    score = 0;
-    over = false;
-    started = false;
+for (let i = 0; i < spiritCount; i++) {
+    spawnSpirit();
 }
 
-function spawnPipe() {
-    const gap = 190;
-    const top = Math.random() * 250 + 50;
-    pipes.push({ x: 400, top });
-}
-
-function update() {
-    if (!started || over) return;
-
-    vel += gravity;
-    birdY += vel;
-
-    pipes.forEach(p => p.x -= 3.5);
-    pipes = pipes.filter(p => p.x > -60);
-
-    if (performance.now() - lastPipe > 1500) {
-        spawnPipe();
-        lastPipe = performance.now();
-    }
-
-    pipes.forEach(p => {
-        if (birdX > p.x + 60 && !p.passed) {
-            p.passed = true;
-            score++;
-            best = Math.max(best, score);
-        }
-
-        const hitX = birdX + 15 > p.x && birdX - 15 < p.x + 60;
-        const hitTop = birdY - 15 < p.top;
-        const hitBottom = birdY + 15 > p.top + 190;
-
-        if (hitX && (hitTop || hitBottom)) over = true;
-    });
-
-    if (birdY > 600 || birdY < 0) over = true;
-}
-
-function draw() {
-    ctx.fillStyle = "#70c5ce";
-    ctx.fillRect(0, 0, 400, 600);
-
-    ctx.fillStyle = "#3a8f3a";
-    pipes.forEach(p => {
-        ctx.fillRect(p.x, 0, 60, p.top);
-        ctx.fillRect(p.x, p.top + 190, 60, 600);
-    });
-
-    ctx.fillStyle = "yellow";
-    ctx.beginPath();
-    ctx.arc(birdX, birdY, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = "white";
-    ctx.font = "28px Arial";
-    ctx.fillText(score, 200, 60);
-
-    if (!started) {
-        ctx.font = "20px Arial";
-        ctx.fillText("Click or SPACE to start", 200, 300);
-    }
-
-    if (over) {
-        ctx.font = "28px Arial";
-        ctx.fillText("Game Over", 200, 280);
-        ctx.font = "20px Arial";
-        ctx.fillText("Click or SPACE to restart", 200, 320);
-    }
-}
-
-function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
-}
-loop();
-
-function flapBird() {
-    if (!started) {
-        started = true;
-        lastPipe = performance.now();
-    }
-    if (over) return reset();
-    vel = flap;
-}
-
-window.addEventListener("keydown", e => {
-    if (e.code === "Space") flapBird();
+document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 12;
+    const y = (e.clientY / window.innerHeight - 0.5) * 12;
+    container.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
 });
-canvas.addEventListener("mousedown", flapBird);
-canvas.addEventListener("touchstart", flapBird);
-
-/* IMFT FLOATING PARTICLES */
-const vortex = document.getElementById("vortex-container");
-const particleCount = 40;
-const particles = [];
-
-for (let i = 0; i < particleCount; i++) {
-    const p = document.createElement("div");
-    p.className = "imft";
-    p.style.backgroundImage = "url('IMFTs/imft.png')";
-    p.style.opacity = Math.random() * 0.7 + 0.3;
-    p.style.transform = `translate3d(${Math.random()*100}vw, ${Math.random()*100}vh, ${Math.random()*800 - 400}px)`;
-    vortex.appendChild(p);
-
-    particles.push({
-        el: p,
-        x: Math.random()*100,
-        y: Math.random()*100,
-        z: Math.random()*800 - 400,
-        rx: Math.random()*360,
-        ry: Math.random()*360,
-        speed: Math.random()*0.3 + 0.1
-    });
-}
-
-let mouseX = 0, mouseY = 0;
-
-window.addEventListener("mousemove", e => {
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-});
-
-function animateIMFTs() {
-    particles.forEach(p => {
-        p.ry += p.speed;
-        p.rx += p.speed * 0.6;
-
-        const x = p.x + mouseX * 20;
-        const y = p.y + mouseY * 20;
-
-        p.el.style.transform =
-            `translate3d(${x}vw, ${y}vh, ${p.z}px)
-             rotateX(${p.rx}deg)
-             rotateY(${p.ry}deg)`;
-    });
-
-    requestAnimationFrame(animateIMFTs);
-}
-animateIMFTs();
 </script>
 
 </body>
