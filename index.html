@@ -31,29 +31,34 @@
             font-family: 'Montserrat', sans-serif;
         }
 
+        /* PARTICLE BACKGROUND */
         #vortex-container {
-            position: absolute;
+            position: fixed;
+            inset: 0;
             width: 100vw;
             height: 100vh;
             transform-style: preserve-3d;
+            z-index: 1;
         }
 
-        /* CENTER TEXT */
-        .yiai-anchor {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        /* MAIN CONTENT */
+        #content {
+            position: relative;
             z-index: 10000;
             text-align: center;
+            top: 50%;
+            transform: translateY(-40%);
+            width: 100%;
         }
 
-        .yiai-text {
+        /* BIG IMFT TITLE */
+        .imft-title {
             font-family: 'Cinzel', serif;
-            font-size: 11vw;
+            font-size: 10vw;
             font-weight: 900;
-            letter-spacing: 55px;
-            padding-left: 55px;
+            letter-spacing: 40px;
+            padding-left: 40px;
+            margin-bottom: 10px;
             background: linear-gradient(
                 to bottom, 
                 var(--green-dark) 0%, 
@@ -71,53 +76,74 @@
             user-select: none;
         }
 
-        /* PARTICLES */
-        .spirit {
-            position: absolute;
-            font-family: 'Montserrat', sans-serif;
+        /* UNDER CONSTRUCTION TEXT */
+        .uc-text {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-top: 10px;
+            color: var(--green-dark);
+            text-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+
+        #countdown {
+            margin-top: 15px;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--green-dark);
+        }
+
+        #gameButton {
+            margin-top: 20px;
+            padding: 12px 22px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
             font-weight: 800;
-            text-transform: uppercase;
-            white-space: nowrap;
-            pointer-events: none;
-            will-change: transform, opacity;
-            letter-spacing: 3px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        #gameButton:hover {
+            background: #cc0000;
+            transform: scale(1.05);
         }
 
-        /* ANIMATIONS */
-        @keyframes texture-shift {
-            0%, 100% { background-position: 50% 0%; }
-            50% { background-position: 50% 100%; }
-        }
-
-        @keyframes breath {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        @keyframes orbital-stream {
-            0% { transform: translate3d(var(--sx), var(--sy), var(--sz)) rotate(0deg); opacity: 0; }
-            10% { opacity: var(--max-op); }
-            90% { opacity: var(--max-op); }
-            100% { transform: translate3d(var(--ex), var(--ey), var(--ez)) rotate(20deg); opacity: 0; }
-        }
-
-        /* FILM GRAIN */
-        .film-grain {
+        /* GAME MODAL */
+        #gameModal {
             position: fixed;
             inset: 0;
-            background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 20000;
-            mix-blend-mode: overlay;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50000;
         }
 
-        /* EMAIL BOX */
+        #gameContainer {
+            background: #222;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        #closeGame {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        /* EMAIL BOX (RIGHT CENTER) */
         #email-box {
             position: fixed;
-            bottom: 20px;
+            top: 50%;
             right: 20px;
+            transform: translateY(-50%);
             background: var(--green-light);
             padding: 14px 18px;
             border-radius: 12px;
@@ -168,6 +194,46 @@
             text-align: center;
             width: 300px;
         }
+
+        /* PARTICLES */
+        .spirit {
+            position: absolute;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            will-change: transform, opacity;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        @keyframes texture-shift {
+            0%, 100% { background-position: 50% 0%; }
+            50% { background-position: 50% 100%; }
+        }
+
+        @keyframes breath {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes orbital-stream {
+            0% { transform: translate3d(var(--sx), var(--sy), var(--sz)) rotate(0deg); opacity: 0; }
+            10% { opacity: var(--max-op); }
+            90% { opacity: var(--max-op); }
+            100% { transform: translate3d(var(--ex), var(--ey), var(--ez)) rotate(20deg); opacity: 0; }
+        }
+
+        .film-grain {
+            position: fixed;
+            inset: 0;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 20000;
+            mix-blend-mode: overlay;
+        }
     </style>
 </head>
 
@@ -175,10 +241,32 @@
 
 <div class="film-grain"></div>
 
-<div id="vortex-container">
-    <div class="yiai-anchor">
-        <h1 class="yiai-text">IMFT</h1>
-        <p style="color: var(--green-mid); letter-spacing: 25px; font-size: 0.9rem; font-weight: 400; opacity: 0.6; margin-top: -40px;">I M F T</p>
+<!-- PARTICLE BACKGROUND -->
+<div id="vortex-container"></div>
+
+<!-- MAIN CONTENT -->
+<div id="content">
+
+    <h1 class="imft-title">IMFT</h1>
+
+    <h2 class="uc-text">imformaltime.com is under construction!</h2>
+
+    <div style="font-size: 0.9rem; color: red; margin-top: 8px; font-weight: 700;">
+        <a href="https://www.youtube.com/@letsGame0925" style="color: red; text-decoration: none;">
+            youtube.com/@letsGame0925
+        </a>
+    </div>
+
+    <div id="countdown">Loading countdown…</div>
+
+    <button id="gameButton">Play some games in the meantime!</button>
+</div>
+
+<!-- GAME MODAL -->
+<div id="gameModal">
+    <div id="closeGame">✖</div>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
     </div>
 </div>
 
@@ -207,6 +295,30 @@
 </div>
 
 <script>
+/* COUNTDOWN */
+window.onload = function() {
+    const targetDate = new Date("2026-03-29T00:00:00");
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            countdown.innerText = "The site may be ready any moment now!";
+            return;
+        }
+
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff / 3600000) % 24);
+        const minutes = Math.floor((diff / 60000) % 60);
+
+        countdown.innerText = `${days} days • ${hours} hours • ${minutes} minutes remaining`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+};
+
 /* EMAIL + CAPTCHA */
 let pendingEmail = "";
 let pendingMsg = "";
@@ -239,6 +351,119 @@ document.getElementById("captchaButton").onclick = function () {
         });
     });
 };
+
+/* GAME */
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let birdY = 300, birdX = 80, vel = 0;
+const gravity = 0.55;
+const flap = -9;
+
+let pipes = [];
+let score = 0, best = 0;
+let started = false, over = false;
+let lastPipe = 0;
+
+function reset() {
+    birdY = 300;
+    vel = 0;
+    pipes = [];
+    score = 0;
+    over = false;
+    started = false;
+}
+
+function spawnPipe() {
+    const gap = 190;
+    const top = Math.random() * 250 + 50;
+    pipes.push({ x: 400, top });
+}
+
+function update() {
+    if (!started || over) return;
+
+    vel += gravity;
+    birdY += vel;
+
+    pipes.forEach(p => p.x -= 3.5);
+    pipes = pipes.filter(p => p.x > -60);
+
+    if (performance.now() - lastPipe > 1500) {
+        spawnPipe();
+        lastPipe = performance.now();
+    }
+
+    pipes.forEach(p => {
+        if (birdX > p.x + 60 && !p.passed) {
+            p.passed = true;
+            score++;
+            best = Math.max(best, score);
+        }
+
+        const hitX = birdX + 15 > p.x && birdX - 15 < p.x + 60;
+        const hitTop = birdY - 15 < p.top;
+        const hitBottom = birdY + 15 > p.top + 190;
+
+        if (hitX && (hitTop || hitBottom)) over = true;
+    });
+
+    if (birdY > 600 || birdY < 0) over = true;
+}
+
+function draw() {
+    ctx.fillStyle = "#70c5ce";
+    ctx.fillRect(0, 0, 400, 600);
+
+    ctx.fillStyle = "#3a8f3a";
+    pipes.forEach(p => {
+        ctx.fillRect(p.x, 0, 60, p.top);
+        ctx.fillRect(p.x, p.top + 190, 60, 600);
+    });
+
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(birdX, birdY, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "white";
+    ctx.font = "28px Arial";
+    ctx.fillText(score, 200, 60);
+
+    if (!started) {
+        ctx.font = "20px Arial";
+        ctx.fillText("Click or SPACE to start", 200, 300);
+    }
+
+    if (over) {
+        ctx.font = "28px Arial";
+        ctx.fillText("Game Over", 200, 280);
+        ctx.font = "20px Arial";
+        ctx.fillText("Click or SPACE to restart", 200, 320);
+    }
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+loop();
+
+function flapBird() {
+    if (!started) {
+        started = true;
+        lastPipe = performance.now();
+    }
+    if (over) return reset();
+    vel = flap;
+}
+
+window.addEventListener("keydown", e => {
+    if (e.code === "Space") flapBird();
+});
+canvas.addEventListener("mousedown", flapBird);
+canvas.addEventListener("touchstart", flapBird);
 
 /* PARTICLE SYSTEM */
 const container = document.getElementById('vortex-container');
