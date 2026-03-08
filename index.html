@@ -332,18 +332,17 @@ animateSpirits();
 /* ===========================
    CONTACT FORM SUBMIT (AJAX)
 =========================== */
-async function handleSubmit(e) {
-    e.preventDefault();
+async function handleSubmit(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("emailInput").value.trim();
+    const message = document.getElementById("msgInput").value.trim();
 
     const token = grecaptcha.enterprise.getResponse();
-
     if (!token) {
         alert("Please complete the reCAPTCHA.");
         return false;
     }
-
-    const email = document.getElementById("emailInput").value.trim();
-    const message = document.getElementById("msgInput").value.trim();
 
     try {
         const res = await fetch("https://imformaltime-site.netlify.app/.netlify/functions/send-email", {
@@ -365,6 +364,7 @@ async function handleSubmit(e) {
     grecaptcha.enterprise.reset();
     return false;
 }
+
 
 /* ===========================
    GAME POPUP + FLAPPY BIRD
