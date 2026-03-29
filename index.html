@@ -23,6 +23,158 @@
     --green-bg: #e8f5e9;
 }
 
+/* Typing animation */
+.typing {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    background: #4caf50;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0% { opacity: 0.2; transform: translateY(0); }
+    20% { opacity: 1; transform: translateY(-3px); }
+    100% { opacity: 0.2; transform: translateY(0); }
+}
+
+
+/* ===========================
+   COLOR VARIABLES (REQUIRED)
+=========================== */
+:root {
+    --green-bg: #d8f5d0;
+    --green-light: #b9e8a8;
+    --green-dark: #2e5a2e;
+    --green-mid: #6fbf73;
+    --green-accent: #9be58c;
+}
+
+/* Chat button */
+.chat-open-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: #4caf50;
+    color: white;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 999999;
+}
+
+/* Chat modal */
+#chatModal {
+    position: fixed;
+    top: 60px;
+    left: 15px;
+    width: 320px;
+    height: 420px;
+    background: #1e1e1e;
+    border-radius: 10px;
+    display: none;
+    flex-direction: column;
+    padding: 10px;
+    z-index: 999999;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    pointer-events: auto;
+}
+
+/* Close button */
+#closeChat {
+    text-align: right;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+}
+
+/* Chat box */
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    background: #111;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    color: white;
+}
+
+/* Messages */
+.msg {
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 8px;
+    max-width: 80%;
+}
+
+.msg.user {
+    background: #4caf50;
+    margin-left: auto;
+}
+
+.msg.bot {
+    background: #333;
+}
+
+/* Input row */
+.chat-input-row {
+    display: flex;
+    gap: 6px;
+}
+
+#chat-input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+}
+
+#sendChat {
+    padding: 8px 12px;
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Spirits must NOT block clicks */
+.spirit {
+    pointer-events: none;
+}
+
+/* ===========================
+   GLOBAL FIXED BACKGROUND
+=========================== */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: radial-gradient(circle at center, var(--green-bg) 0%, var(--green-light) 100%);
+    color: var(--green-dark);
+    font-family: 'Montserrat', sans-serif;
+    perspective: 2000px;
+}
+
 /* ===========================
    GLOBAL
 =========================== */
@@ -209,6 +361,20 @@ html, body {
 </head>
 
 <body>
+<!-- CHAT BUTTON (TOP LEFT) -->
+<button id="chatButton" class="chat-open-btn">Chat with rReplay</button>
+
+<!-- CHAT POPUP -->
+<div id="chatModal">
+    <div id="closeChat">✖</div>
+
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="chat-input-row">
+        <input id="chat-input" type="text" placeholder="Type a message...">
+        <button id="sendChat">Send</button>
+    </div>
+</div>
 
 <!-- PARTICLE BACKGROUND -->
 <div id="vortex-container"></div>
@@ -258,6 +424,78 @@ html, body {
 </div>
 
 <script>
+/* ===========================
+   CHATBOT BACKEND CALL
+=========================== */
+async function sendMessage(message) {
+    const response = await fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+    return data.reply;
+}
+
+/* ===========================
+   CHAT UI LOGIC
+=========================== */
+const chatBox = document.getElementById("chat-box");
+const input = document.getElementById("chat-input");
+
+async function handleSend() {
+    const userText = input.value.trim();
+    if (!userText) return;
+
+    // Add user message
+    chatBox.innerHTML += `<div class="msg user">${userText}</div>`;
+    input.value = "";
+
+    // Add animated typing indicator
+    chatBox.innerHTML += `
+        <div class="msg bot typing">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    `;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Get AI reply
+    const reply = await sendMessage(userText);
+
+    // Remove typing animation
+    document.querySelector(".typing").remove();
+
+    // Add bot reply
+    chatBox.innerHTML += `<div class="msg bot">${reply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+/* ===========================
+   CHAT POPUP OPEN/CLOSE
+=========================== */
+const chatModal = document.getElementById("chatModal");
+const chatButton = document.getElementById("chatButton");
+const closeChat = document.getElementById("closeChat");
+const sendChat = document.getElementById("sendChat");
+
+chatButton.onclick = () => {
+    chatModal.style.display = "flex";
+};
+
+closeChat.onclick = () => {
+    chatModal.style.display = "none";
+};
+
+sendChat.onclick = handleSend;
+
+// Allow Enter key to send
+input.addEventListener("keydown", e => {
+    if (e.key === "Enter") handleSend();
+});
+
 /* ===========================
    COUNTDOWN
 =========================== */
