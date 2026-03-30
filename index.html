@@ -2,307 +2,454 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>IMFT – Chat with rReplay</title>
+  <title>IMFT | rReplay AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- REAL RECAPTCHA ENTERPRISE -->
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    :root {
+      --bg-main: #020403;
+      --bg-elevated: #050806;
+      --accent: #7dff8a;
+      --accent-soft: rgba(76, 175, 80, 0.35);
+      --border-subtle: rgba(120, 255, 150, 0.25);
+      --text-main: #e8ffe9;
+      --text-muted: #8aa58f;
+    }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<style>
-/* ====== THEME VARIABLES ====== */
-:root {
-  --bg-main: #050505;
-  --bg-elevated: #101010;
-  --bg-glass: rgba(20, 20, 20, 0.9);
-  --accent: #4caf50;
-  --accent-soft: #2f8f3a;
-  --text-main: #f5f5f5;
-  --text-muted: #aaaaaa;
-  --border-subtle: #222;
-}
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #07140a 0, #020403 45%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
 
-* { box-sizing: border-box; }
+    #app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px 10px 14px;
+    }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--bg-main);
-  color: var(--text-main);
-  font-family: system-ui, sans-serif;
-}
+    /* SIDEBAR + HAMBURGER */
 
-#app {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh;
-  background: radial-gradient(circle at top, #0b1b0b 0%, #020302 55%, #000 100%);
-}
+    .sidebar-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 4000;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: rgba(5, 10, 5, 0.8);
+      color: var(--accent);
+      cursor: pointer;
+    }
 
-/* ====== SIDEBAR ====== */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 230px;
-  height: 100vh;
-  background: #0a0a0a;
-  border-right: 1px solid #1a1a1a;
-  padding: 20px 0;
-  transform: translateX(-100%);
-  transition: 0.25s ease;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      height: 100vh;
+      background: rgba(5, 10, 5, 0.96);
+      border-right: 1px solid var(--accent-soft);
+      transform: translateX(-100%);
+      transition: transform 0.2s ease-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 60px 12px 16px;
+      z-index: 3500;
+    }
 
-.sidebar.open { transform: translateX(0); }
+    .sidebar.open {
+      transform: translateX(0);
+    }
 
-.sidebar-main,
-.sidebar-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+    .sidebar-item {
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-main);
+      cursor: pointer;
+    }
 
-.sidebar-main { margin-top: 40px; }
-.sidebar-bottom { margin-bottom: 20px; }
+    .sidebar-item:hover {
+      border-color: var(--accent-soft);
+      background: rgba(10, 20, 10, 0.6);
+    }
 
-.sidebar-item {
-  width: 100%;
-  padding: 12px 16px;
-  background: transparent;
-  border: none;
-  color: var(--text-main);
-  font-size: 0.95rem;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-}
+    .sidebar-main,
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-.sidebar-item:hover {
-  background: rgba(76, 175, 80, 0.12);
-}
+    /* TOP BAR */
 
-.sidebar-toggle {
-  position: fixed;
-  top: 14px;
-  left: 14px;
-  z-index: 10000;
-  background: #0a0a0a;
-  border: 1px solid #1a1a1a;
-  color: var(--accent);
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      background: rgba(5, 10, 5, 0.9);
+      margin-left: 40px;
+      margin-bottom: 10px;
+      position: relative;
+    }
 
-/* ====== TOP BAR ====== */
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: #050505;
-  border-bottom: 1px solid var(--border-subtle);
-  position: relative;
-  overflow: visible;
-}
+    .top-title {
+      font-weight: 600;
+      color: var(--accent);
+      margin-left: 10px;
+      white-space: normal;
+      max-width: 60%;
+      line-height: 1.2;
+    }
 
-.top-title {
-  font-weight: 600;
-  color: var(--accent);
-  margin-left: 40px;
-}
+    .contact-btn {
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      background: rgba(5, 15, 5, 0.9);
+      color: var(--accent);
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
 
-/* ====== CONTACT BUTTON ====== */
-#contactToggle {
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(76, 175, 80, 0.6);
-  background: rgba(10, 20, 10, 0.35);
-  color: #b9ffbf;
-  font-size: 0.85rem;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
+    /* CONTACT POPUP */
 
-/* ====== CONTACT POPUP ====== */
-#contactPopup {
-  position: absolute;
-  right: 16px;
-  top: 110%;
-  width: 260px;
-  padding: 14px;
-  background: rgba(15, 25, 15, 0.75);
-  border-radius: 14px;
-  border: 1px solid rgba(76, 175, 80, 0.35);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 9999;
-}
+    .contact-popup {
+      position: absolute;
+      top: 110%;
+      right: 10px;
+      width: 260px;
+      background: rgba(5, 10, 5, 0.98);
+      border-radius: 14px;
+      border: 1px solid var(--accent-soft);
+      padding: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 1200;
+    }
 
-.contact-label { font-size: 0.75rem; color: var(--text-muted); }
+    .contact-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
 
-.contact-input,
-.contact-textarea {
-  background: #050505;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  padding: 6px 8px;
-  color: var(--text-main);
-}
+    .contact-input,
+    .contact-textarea {
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: #020403;
+      color: var(--text-main);
+      padding: 6px 8px;
+      font-size: 0.8rem;
+    }
 
-.contact-send {
-  margin-top: 6px;
-  width: 100%;
-  padding: 6px 0;
-  border-radius: 999px;
-  border: none;
-  background: var(--accent);
-  color: #000;
-  font-weight: 600;
-  cursor: pointer;
-}
+    .contact-textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
 
-/* ====== CHAT AREA ====== */
-.chat-wrapper { flex: 1; overflow: hidden; }
+    .contact-send {
+      align-self: flex-end;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
 
-.chat-area {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+    /* CHAT AREA */
 
-.msg {
-  max-width: 80%;
-  padding: 8px 11px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
+    .chat-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: 18px;
+      border: 1px solid var(--accent-soft);
+      background: radial-gradient(circle at top, #050c06 0, #020403 40%, #000 100%);
+      padding: 10px 10px 6px;
+      overflow: hidden;
+    }
 
-.msg.user {
-  margin-left: auto;
-  background: var(--accent);
-  color: #000;
-}
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-.msg.bot {
-  margin-right: auto;
-  background: var(--bg-elevated);
-}
+    .msg {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+    }
 
-/* ====== TYPING INDICATOR ====== */
-.typing-indicator {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  width: fit-content;
-  background: rgba(20, 30, 20, 0.55);
-  border-radius: 14px;
-  border: 1px solid rgba(76, 175, 80, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  margin-top: 6px;
-}
+    .msg.user {
+      align-self: flex-end;
+      background: rgba(80, 255, 120, 0.1);
+      border: 1px solid rgba(80, 255, 120, 0.4);
+    }
 
-.typing-indicator .dot {
-  width: 8px;
-  height: 8px;
-  background: #7dff8a;
-  border-radius: 50%;
-  animation: typingBlink 1.4s infinite both;
-}
+    .msg.bot {
+      align-self: flex-start;
+      background: rgba(10, 20, 10, 0.9);
+      border: 1px solid rgba(80, 255, 120, 0.25);
+    }
 
-.typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+    /* TYPING INDICATOR */
 
-@keyframes typingBlink {
-  0% { opacity: 0.2; transform: translateY(0); }
-  20% { opacity: 1; transform: translateY(-3px); }
-  100% { opacity: 0.2; transform: translateY(0); }
-}
+    .typing-indicator {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      width: fit-content;
+      background: rgba(20, 30, 20, 0.55);
+      border-radius: 14px;
+      border: 1px solid rgba(76, 175, 80, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-top: 6px;
+    }
 
-/* ====== BOTTOM BAR ====== */
-.bottom-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-top: 1px solid var(--border-subtle);
-  background: #050505;
-}
+    .typing-indicator .dot {
+      width: 8px;
+      height: 8px;
+      background: #7dff8a;
+      border-radius: 50%;
+      animation: typingBlink 1.4s infinite both;
+    }
 
-#chatInput {
-  flex: 1;
-  border-radius: 999px;
-  border: 1px solid var(--border-subtle);
-  background: #050505;
-  color: var(--text-main);
-  padding: 8px 12px;
-}
+    .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
 
-.send-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: none;
-  background: var(--accent);
-  color: #000;
-  cursor: pointer;
-}
+    @keyframes typingBlink {
+      0% { opacity: 0.2; transform: translateY(0); }
+      20% { opacity: 1; transform: translateY(-3px); }
+      100% { opacity: 0.2; transform: translateY(0); }
+    }
 
-/* ====== PAGE OVERLAY ====== */
-.page-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(5, 5, 5, 0.96);
-  backdrop-filter: blur(6px);
-  display: none;
-  flex-direction: column;
-  padding: 40px;
-  z-index: 9000;
-}
+    /* BOTTOM BAR */
 
-.page-overlay h1 { color: var(--accent); }
-</style>
+    .bottom-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      background: rgba(5, 10, 5, 0.95);
+    }
 
+    #chatInput {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #020403;
+      color: var(--text-main);
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    .send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* PLUS BUTTON */
+
+    .plus-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: rgba(10, 20, 10, 0.4);
+      color: var(--accent);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    /* MODEL SELECTOR */
+
+    .model-select {
+      position: relative;
+      width: 170px;
+      user-select: none;
+    }
+
+    .model-selected {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #050505;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .model-options {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      width: 100%;
+      background: rgba(15, 25, 15, 0.9);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      flex-direction: column;
+      z-index: 9999;
+    }
+
+    .model-option {
+      padding: 8px 10px;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 0.8rem;
+    }
+
+    .model-option:hover {
+      background: rgba(76, 175, 80, 0.15);
+    }
+
+    .model-option .sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* + POPUP */
+
+    .plus-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.6);
+      z-index: 99999;
+    }
+
+    .plus-popup-inner {
+      background: rgba(15, 25, 15, 0.85);
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(76, 175, 80, 0.35);
+      text-align: center;
+      color: var(--text-main);
+      max-width: 260px;
+    }
+
+    .close-plus {
+      margin-top: 10px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* PAGE OVERLAY (ABOUT / SETTINGS) */
+
+    .page-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #050c06 0, #020403 40%, #000 100%);
+      display: none;
+      flex-direction: column;
+      padding: 40px 20px;
+      z-index: 3000;
+      overflow-y: auto;
+    }
+
+    .page-overlay h1 {
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .page-overlay p {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .closePage {
+      margin-top: 20px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(76, 175, 80, 0.6);
+      background: rgba(10, 20, 10, 0.35);
+      color: #b9ffbf;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-size: 0.85rem;
+      align-self: flex-start;
+    }
+  </style>
 </head>
-
 <body>
 
 <!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
-
   <div class="sidebar-main">
     <button class="sidebar-item" id="navConversation">💬 Conversation</button>
   </div>
-
   <div class="sidebar-bottom">
     <button class="sidebar-item" id="navAbout">ℹ️ About</button>
     <button class="sidebar-item" id="navSettings">⚙️ Settings</button>
   </div>
-
 </div>
 
 <button id="sidebarToggle" class="sidebar-toggle">☰</button>
@@ -311,12 +458,11 @@ html, body {
 
   <!-- TOP BAR -->
   <header class="top-bar">
-    <div class="top-title">Chat with rReplay</div>
+    <div class="top-title">IMFT | Chat with rReplay</div>
     <button id="contactToggle" class="contact-btn">Contact Me</button>
 
     <!-- CONTACT POPUP -->
     <div id="contactPopup" class="contact-popup">
-
       <label class="contact-label">Your email
         <input type="email" id="contactEmail" class="contact-input">
       </label>
@@ -331,166 +477,231 @@ html, body {
 
   <!-- CHAT -->
   <main class="chat-wrapper">
-
     <div id="chatArea" class="chat-area">
-
-      <!-- TYPING BUBBLE (MUST BE INSIDE chatArea) -->
-      <div id="typingIndicator" class="typing-indicator" style="display:none;">
+      <!-- TYPING BUBBLE -->
+      <div id="typingIndicator" class="typing-indicator">
         <div class="dot"></div>
         <div class="dot"></div>
         <div class="dot"></div>
       </div>
-
     </div>
-
   </main>
 
-  <!-- INPUT -->
+  <!-- INPUT BAR WITH + AND MODEL SELECTOR -->
   <footer class="bottom-bar">
+    <button id="plusBtn" class="plus-btn">+</button>
+
+    <div class="model-select" id="modelSelect">
+      <div class="model-selected" id="modelSelected">
+        rReplay BETA 0.1
+      </div>
+      <div class="model-options" id="modelOptions">
+        <div class="model-option" data-model="rReplay BETA 0.1">
+          <strong>rReplay BETA 0.1</strong>
+          <div class="sub">Empowered by llama‑3.1‑8b‑instant</div>
+        </div>
+        <div class="model-option" data-model="rReplay BETA R1">
+          <strong>rReplay BETA R1</strong>
+          <div class="sub">Empowered by llama‑3.1‑8b</div>
+        </div>
+      </div>
+    </div>
+
     <input id="chatInput" type="text" placeholder="Send a message...">
     <button id="sendBtn" class="send-btn">➤</button>
   </footer>
 
 </div>
 
+<!-- + POPUP -->
+<div id="plusPopup" class="plus-popup">
+  <div class="plus-popup-inner">
+    <p>Upload option coming soon!</p>
+    <button id="closePlus" class="close-plus">Close</button>
+  </div>
+</div>
 
 <script>
-/* === AI PERSONALITY === */
-const AI_PERSONALITY = `
+  /* === AI PERSONALITY === */
+  const AI_PERSONALITY = `
 You are rReplay, an AI assistant.
 You speak clearly, helpfully, and with confidence.
 You keep answers short and simple unless the user asks for detail.
 You, the AI on the website imformaltime.com (nothing else. Not informalTime, just imformaltime.com), were made by Eidan, a developer who loves coding.
 You, the AI model itself, were developed by Meta.
 You reason like ChatGPT, have the real-time edge of Grok, and the vast context of Gemini.
+If the user asks, your creator's youtube channel is I'mFormaltime. The youtube link is www.youtube.com/@letsGame0925
 `;
 
-/* ====== BACKEND CHAT ====== */
-async function sendMessage(message) {
-  const response = await fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  /* ====== BACKEND CHAT (SIMPLE, NO RETRY) ====== */
+  async function sendMessage(message) {
+    const payload = {
       message: AI_PERSONALITY + "\nUser: " + message
-    })
+    };
+
+    const response = await fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error("Backend returned " + response.status);
+    }
+
+    const data = await response.json();
+    return data.reply;
+  }
+
+  /* ====== CHAT LOGIC ====== */
+  const chatArea = document.getElementById("chatArea");
+  const chatInput = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const typing = document.getElementById("typingIndicator");
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+  }
+
+  async function handleSend() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    chatArea.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
+    chatInput.value = "";
+
+    typing.style.display = "flex";
+    chatArea.appendChild(typing);
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    try {
+      const reply = await sendMessage(text);
+      typing.style.display = "none";
+      chatArea.innerHTML += `<div class="msg bot">${escapeHtml(reply)}</div>`;
+    } catch (err) {
+      console.error(err);
+      typing.style.display = "none";
+      chatArea.innerHTML += `<div class="msg bot">Error: Could not reach rReplay.</div>`;
+    }
+
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  sendBtn.onclick = handleSend;
+  chatInput.onkeydown = e => {
+    if (e.key === "Enter") handleSend();
+  };
+
+  /* ====== SIDEBAR ====== */
+  const sidebar = document.getElementById("sidebar");
+  const sidebarToggle = document.getElementById("sidebarToggle");
+
+  sidebarToggle.onclick = () => {
+    sidebar.classList.toggle("open");
+  };
+
+  /* ====== PAGE OVERLAY SYSTEM ====== */
+  function getOverlay() {
+    let overlay = document.getElementById("pageOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "pageOverlay";
+      overlay.className = "page-overlay";
+      document.body.appendChild(overlay);
+    }
+    return overlay;
+  }
+
+  function openPage(title, contentHtml) {
+    const overlay = getOverlay();
+    overlay.innerHTML = `
+      <h1>${title}</h1>
+      ${contentHtml}
+      <button class="closePage">Close</button>
+    `;
+    overlay.style.display = "flex";
+
+    const closeBtn = overlay.querySelector(".closePage");
+    closeBtn.onclick = () => {
+      overlay.style.display = "none";
+    };
+  }
+
+  /* ====== NAV BUTTONS ====== */
+  document.getElementById("navConversation").onclick = () => {
+    sidebar.classList.remove("open");
+    const overlay = document.getElementById("pageOverlay");
+    if (overlay) overlay.style.display = "none";
+  };
+
+  document.getElementById("navAbout").onclick = () => {
+    sidebar.classList.remove("open");
+    openPage("About", `
+      <p>
+        Hello from rReplay! rReplay is a small AI model developed by me (duh),
+        and can do some basic tasks. Heres one tip: Don't ask it to code anything
+        for you! rReplay is TERRIBLE at coding!
+      </p>
+    `);
+  };
+
+  document.getElementById("navSettings").onclick = () => {
+    sidebar.classList.remove("open");
+    openPage("Settings", `<p>Coming Soon...</p>`);
+  };
+
+  /* ====== CONTACT POPUP ====== */
+  const contactPopup = document.getElementById("contactPopup");
+  const contactToggle = document.getElementById("contactToggle");
+
+  contactToggle.onclick = (e) => {
+    e.stopPropagation();
+    contactPopup.style.display =
+      contactPopup.style.display === "flex" ? "none" : "flex";
+  };
+
+  document.addEventListener("click", (e) => {
+    if (!contactPopup.contains(e.target) &&
+        !contactToggle.contains(e.target)) {
+      contactPopup.style.display = "none";
+    }
   });
 
-  const data = await response.json();
-  return data.reply;
-}
-
-/* ====== CHAT LOGIC ====== */
-const chatArea = document.getElementById("chatArea");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-const typing = document.getElementById("typingIndicator");
-
-async function handleSend() {
-  const text = chatInput.value.trim();
-  if (!text) return;
-
-  chatArea.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
-  chatInput.value = "";
-
-  typing.style.display = "flex";
-  chatArea.appendChild(typing);
-  chatArea.scrollTop = chatArea.scrollHeight;
-
-  try {
-    const reply = await sendMessage(text);
-
-    typing.style.display = "none";
-
-    chatArea.innerHTML += `<div class="msg bot">${escapeHtml(reply)}</div>`;
-  } catch {
-    typing.style.display = "none";
-    chatArea.innerHTML += `<div class="msg bot">Error: Could not reach rReplay.</div>`;
-  }
-
-  chatArea.scrollTop = chatArea.scrollHeight;
-}
-
-sendBtn.onclick = handleSend;
-chatInput.onkeydown = e => {
-  if (e.key === "Enter") handleSend();
-};
-
-function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-}
-
-/* ====== SIDEBAR ====== */
-const sidebar = document.getElementById("sidebar");
-document.getElementById("sidebarToggle").onclick = () => {
-  sidebar.classList.toggle("open");
-};
-
-/* ====== PAGE OVERLAY SYSTEM ====== */
-function openPage(title, content) {
-  let overlay = document.getElementById("pageOverlay");
-
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.id = "pageOverlay";
-    overlay.className = "page-overlay";
-    document.body.appendChild(overlay);
-  }
-
-  overlay.innerHTML = `
-    <h1>${title}</h1>
-    ${content}
-    <button class="closePage">Close</button>
-  `;
-
-  overlay.style.display = "flex";
-
-  overlay.querySelector(".closePage").onclick = () => {
-    overlay.style.display = "none";
+  document.querySelector(".contact-send").onclick = () => {
+    alert("Form submitted! (no backend wired yet)");
   };
-}
 
-/* ====== ABOUT / SETTINGS ====== */
-document.getElementById("navConversation").onclick = () => {
-  sidebar.classList.remove("open");
-};
+  /* ====== MODEL SELECTOR ====== */
+  const modelSelected = document.getElementById("modelSelected");
+  const modelOptions = document.getElementById("modelOptions");
 
-document.getElementById("navAbout").onclick = () => {
-  sidebar.classList.remove("open");
-  openPage("About", `
-    <p>
-      Hello from rReplay! rReplay is a small AI model developed by me (duh),
-      and can do some basic tasks. Heres one tip: Don't ask it to code anything
-      for you! rReplay is TERRIBLE at coding!
-    </p>
-  `);
-};
+  modelSelected.onclick = () => {
+    modelOptions.style.display =
+      modelOptions.style.display === "flex" ? "none" : "flex";
+  };
 
-document.getElementById("navSettings").onclick = () => {
-  sidebar.classList.remove("open");
-  openPage("Settings", `<p>Coming Soon...</p>`);
-};
+  document.querySelectorAll(".model-option").forEach(opt => {
+    opt.onclick = () => {
+      modelSelected.textContent = opt.dataset.model;
+      modelOptions.style.display = "none";
+    };
+  });
 
-/* ====== CONTACT POPUP ====== */
-const contactPopup = document.getElementById("contactPopup");
-const contactToggle = document.getElementById("contactToggle");
+  /* ====== PLUS POPUP ====== */
+  const plusBtn = document.getElementById("plusBtn");
+  const plusPopup = document.getElementById("plusPopup");
+  const closePlus = document.getElementById("closePlus");
 
-contactToggle.onclick = (e) => {
-  e.stopPropagation();
-  contactPopup.style.display =
-    contactPopup.style.display === "flex" ? "none" : "flex";
-};
+  plusBtn.onclick = () => {
+    plusPopup.style.display = "flex";
+  };
 
-document.addEventListener("click", (e) => {
-  if (!contactPopup.contains(e.target) &&
-      !contactToggle.contains(e.target)) {
-    contactPopup.style.display = "none";
-  }
-});
+  closePlus.onclick = () => {
+    plusPopup.style.display = "none";
+  };
 </script>
 
 </body>
-
-
 </html>
