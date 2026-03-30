@@ -2,18 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>IMFT | rReplay AI</title>
+  <title>rReplay – Themed AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Minecraft-like font -->
+  <link href="https://fonts.cdnfonts.com/css/minecraft-4" rel="stylesheet">
+  <!-- Geometry Dash-ish blocky font (optional fallback) -->
+  <link href="https://fonts.cdnfonts.com/css/visitor" rel="stylesheet">
 
   <style>
     :root {
-      --bg-main: #020403;
-      --bg-elevated: #050806;
+      /* Base (Default) theme variables */
+      --bg-main: radial-gradient(circle at top, #07140a 0, #020403 45%, #000 100%);
+      --bg-panel: rgba(5, 10, 5, 0.95);
+      --bg-chat: rgba(0, 0, 0, 0.4);
       --accent: #7dff8a;
       --accent-soft: rgba(76, 175, 80, 0.35);
       --border-subtle: rgba(120, 255, 150, 0.25);
       --text-main: #e8ffe9;
       --text-muted: #8aa58f;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+      --btn-bg: rgba(10, 20, 10, 0.7);
+      --btn-bg-hover: rgba(10, 30, 10, 0.9);
+      --btn-border: var(--accent-soft);
+      --chat-user-bg: rgba(80, 255, 120, 0.1);
+      --chat-user-border: rgba(80, 255, 120, 0.4);
+      --chat-bot-bg: rgba(10, 20, 10, 0.9);
+      --chat-bot-border: rgba(80, 255, 120, 0.25);
+      --typing-bg: rgba(20, 30, 20, 0.55);
+      --typing-border: rgba(76, 175, 80, 0.25);
+    }
+
+    /* Minecraft theme overrides */
+    body.theme-minecraft {
+      --bg-main: linear-gradient(#6bbf4b, #4f9b3a 40%, #2f5b1f 60%, #0b1f10 100%);
+      --bg-panel: rgba(15, 30, 18, 0.96);
+      --bg-chat: rgba(0, 0, 0, 0.55);
+      --accent: #80ff00;
+      --accent-soft: rgba(128, 255, 0, 0.35);
+      --border-subtle: rgba(180, 255, 180, 0.4);
+      --text-main: #e8ffe9;
+      --text-muted: #9bb89c;
+      --font-main: 'Minecraft', sans-serif;
+
+      --btn-bg: rgba(10, 30, 10, 0.8);
+      --btn-bg-hover: rgba(20, 50, 20, 0.95);
+      --btn-border: #000;
+      --chat-user-bg: rgba(0, 0, 0, 0.6);
+      --chat-user-border: transparent;
+      --chat-bot-bg: rgba(0, 0, 0, 0.6);
+      --chat-bot-border: transparent;
+      --typing-bg: rgba(0, 0, 0, 0.6);
+      --typing-border: rgba(128, 255, 0, 0.5);
+    }
+
+    /* Geometry Dash theme overrides */
+    body.theme-gd {
+      --bg-main: radial-gradient(circle at top, #1b3f8f 0, #0b1b3a 45%, #02040a 100%);
+      --bg-panel: rgba(10, 18, 40, 0.96);
+      --bg-chat: rgba(5, 10, 25, 0.7);
+      --accent: #ffd23b; /* yellow/gold */
+      --accent-soft: rgba(255, 210, 59, 0.45);
+      --border-subtle: rgba(255, 210, 59, 0.5);
+      --text-main: #fef6d8;
+      --text-muted: #c9c3a0;
+      --font-main: 'Visitor', system-ui, sans-serif;
+
+      --btn-bg: rgba(20, 30, 70, 0.9);
+      --btn-bg-hover: rgba(30, 45, 90, 1);
+      --btn-border: #000;
+      --chat-user-bg: rgba(0, 0, 0, 0.65); /* transparent GD chat */
+      --chat-user-border: rgba(0, 255, 255, 0.6);
+      --chat-bot-bg: rgba(0, 0, 0, 0.65);
+      --chat-bot-border: rgba(255, 210, 59, 0.7);
+      --typing-bg: rgba(0, 0, 0, 0.7);
+      --typing-border: rgba(255, 210, 59, 0.8);
     }
 
     * {
@@ -23,14 +87,39 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #07140a 0, #020403 45%, #000 100%);
-      color: var(--text-main);
+      font-family: var(--font-main);
+      background: var(--bg-main);
       min-height: 100vh;
       display: flex;
       align-items: stretch;
       justify-content: center;
+      color: var(--text-main);
+    }
+
+    body.theme-minecraft::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.15) 1px, transparent 1px);
+      background-size: 4px 4px;
+      pointer-events: none;
+      opacity: 0.6;
+      z-index: -1;
+    }
+
+    body.theme-gd::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 12px 12px;
+      pointer-events: none;
+      opacity: 0.4;
+      z-index: -1;
     }
 
     #app {
@@ -56,16 +145,32 @@
       background: rgba(5, 10, 5, 0.8);
       color: var(--accent);
       cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(10, 25, 10, 0.95);
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .sidebar-toggle,
+    body.theme-gd .sidebar-toggle {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: rgba(20, 40, 20, 0.8);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
     }
 
     .sidebar {
       position: fixed;
       top: 0;
       left: 0;
-      width: 220px;
+      width: 230px;
       height: 100vh;
-      background: rgba(5, 10, 5, 0.96);
-      border-right: 1px solid var(--accent-soft);
+      background: var(--bg-panel);
       transform: translateX(-100%);
       transition: transform 0.2s ease-out;
       display: flex;
@@ -73,10 +178,34 @@
       justify-content: space-between;
       padding: 60px 12px 16px;
       z-index: 3500;
+      border-right: 1px solid var(--accent-soft);
+    }
+
+    body.theme-minecraft .sidebar,
+    body.theme-gd .sidebar {
+      border-right: none;
+      border: 2px solid #000;
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
     }
 
     .sidebar.open {
       transform: translateX(0);
+    }
+
+    .sidebar-title {
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    body.theme-minecraft .sidebar-title,
+    body.theme-gd .sidebar-title {
+      font-weight: 400;
+      font-size: 0.8rem;
     }
 
     .sidebar-item {
@@ -86,14 +215,39 @@
       margin-bottom: 6px;
       border-radius: 999px;
       border: 1px solid transparent;
-      background: transparent;
+      background: rgba(10, 20, 10, 0.6);
       color: var(--text-main);
       cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     }
 
     .sidebar-item:hover {
       border-color: var(--accent-soft);
-      background: rgba(10, 20, 10, 0.6);
+      background: rgba(10, 30, 10, 0.9);
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .sidebar-item,
+    body.theme-gd .sidebar-item {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: rgba(10, 20, 10, 0.7);
+      font-size: 0.8rem;
+    }
+
+    body.theme-minecraft .sidebar-item:hover,
+    body.theme-gd .sidebar-item:hover {
+      background: rgba(20, 40, 20, 0.9);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(128,255,0,0.25);
+    }
+
+    body.theme-gd .sidebar-item:hover {
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.9),
+        0 0 0 4px rgba(255,210,59,0.4);
     }
 
     .sidebar-main,
@@ -109,32 +263,169 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
       padding: 10px 14px;
       border-radius: 999px;
       border: 1px solid var(--accent-soft);
-      background: rgba(5, 10, 5, 0.9);
+      background: var(--bg-panel);
       margin-left: 40px;
       margin-bottom: 10px;
       position: relative;
     }
 
+    body.theme-minecraft .top-bar,
+    body.theme-gd .top-bar {
+      border-radius: 6px;
+      border: 2px solid #000;
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    .top-left,
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top-center {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+
     .top-title {
       font-weight: 600;
       color: var(--accent);
-      margin-left: 10px;
-      white-space: normal;
-      max-width: 60%;
-      line-height: 1.2;
+      white-space: nowrap;
+      font-size: 0.95rem;
+    }
+
+    body.theme-minecraft .top-title,
+    body.theme-gd .top-title {
+      font-weight: 400;
+      font-size: 0.9rem;
     }
 
     .contact-btn {
       border-radius: 999px;
       border: 1px solid var(--accent-soft);
-      background: rgba(5, 15, 5, 0.9);
+      background: rgba(5, 15, 5, 0.8);
       color: var(--accent);
       padding: 6px 14px;
       cursor: pointer;
       font-size: 0.85rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .contact-btn:hover {
+      background: rgba(10, 25, 10, 0.95);
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .contact-btn,
+    body.theme-gd .contact-btn {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: var(--btn-bg);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    body.theme-minecraft .contact-btn:hover,
+    body.theme-gd .contact-btn:hover {
+      background: var(--btn-bg-hover);
+    }
+
+    /* THEME DROPDOWN */
+
+    .theme-select {
+      position: relative;
+      width: 180px;
+      user-select: none;
+    }
+
+    .theme-selected {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      background: rgba(5, 15, 5, 0.85);
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-align: center;
+      white-space: nowrap;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .theme-selected:hover {
+      background: rgba(10, 25, 10, 0.95);
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .theme-selected,
+    body.theme-gd .theme-selected {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: var(--btn-bg);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    .theme-options {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      width: 100%;
+      background: rgba(5, 10, 5, 0.98);
+      border-radius: 12px;
+      border: 1px solid var(--accent-soft);
+      display: none;
+      flex-direction: column;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    body.theme-minecraft .theme-options,
+    body.theme-gd .theme-options {
+      border-radius: 6px;
+      border: 2px solid #000;
+      background: rgba(10, 20, 10, 0.98);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    .theme-option {
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: background 0.15s ease;
+    }
+
+    .theme-option-title {
+      font-weight: 600;
+    }
+
+    .theme-option-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .theme-option:hover {
+      background: rgba(128, 255, 0, 0.15);
+    }
+
+    body.theme-gd .theme-option:hover {
+      background: rgba(255, 210, 59, 0.18);
     }
 
     /* CONTACT POPUP */
@@ -154,6 +445,15 @@
       z-index: 1200;
     }
 
+    body.theme-minecraft .contact-popup,
+    body.theme-gd .contact-popup {
+      border-radius: 6px;
+      border: 2px solid #000;
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
     .contact-label {
       display: flex;
       flex-direction: column;
@@ -170,6 +470,15 @@
       color: var(--text-main);
       padding: 6px 8px;
       font-size: 0.8rem;
+      font-family: inherit;
+    }
+
+    body.theme-minecraft .contact-input,
+    body.theme-minecraft .contact-textarea,
+    body.theme-gd .contact-input,
+    body.theme-gd .contact-textarea {
+      border-radius: 3px;
+      border: 2px solid #000;
     }
 
     .contact-textarea {
@@ -186,6 +495,27 @@
       padding: 6px 14px;
       cursor: pointer;
       font-size: 0.8rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .contact-send:hover {
+      background: #a8ffb0;
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .contact-send,
+    body.theme-gd .contact-send {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: rgba(128, 255, 0, 0.85);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    body.theme-minecraft .contact-send:hover,
+    body.theme-gd .contact-send:hover {
+      background: rgba(160, 255, 80, 1);
     }
 
     /* CHAT AREA */
@@ -199,6 +529,16 @@
       background: radial-gradient(circle at top, #050c06 0, #020403 40%, #000 100%);
       padding: 10px 10px 6px;
       overflow: hidden;
+    }
+
+    body.theme-minecraft .chat-wrapper,
+    body.theme-gd .chat-wrapper {
+      border-radius: 6px;
+      border: 2px solid #000;
+      background: var(--bg-panel);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
     }
 
     .chat-area {
@@ -215,18 +555,35 @@
       padding: 8px 12px;
       border-radius: 14px;
       font-size: 0.9rem;
+      background: var(--bg-chat);
+      color: #ffffff;
+      border: 1px solid transparent;
     }
 
     .msg.user {
       align-self: flex-end;
-      background: rgba(80, 255, 120, 0.1);
-      border: 1px solid rgba(80, 255, 120, 0.4);
+      background: var(--chat-user-bg);
+      border-color: var(--chat-user-border);
     }
 
     .msg.bot {
       align-self: flex-start;
-      background: rgba(10, 20, 10, 0.9);
-      border: 1px solid rgba(80, 255, 120, 0.25);
+      background: var(--chat-bot-bg);
+      border-color: var(--chat-bot-border);
+    }
+
+    body.theme-minecraft .msg {
+      max-width: 90%;
+      padding: 4px 6px;
+      border-radius: 3px;
+      font-size: 0.85rem;
+    }
+
+    body.theme-gd .msg {
+      max-width: 90%;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
     }
 
     /* TYPING INDICATOR */
@@ -235,31 +592,77 @@
       display: none;
       align-items: center;
       gap: 6px;
-      padding: 10px 14px;
+      padding: 6px 10px;
       width: fit-content;
-      background: rgba(20, 30, 20, 0.55);
+      background: var(--typing-bg);
       border-radius: 14px;
-      border: 1px solid rgba(76, 175, 80, 0.25);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--typing-border);
       margin-top: 6px;
     }
 
-    .typing-indicator .dot {
-      width: 8px;
-      height: 8px;
-      background: #7dff8a;
+    .typing-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.4;
       animation: typingBlink 1.4s infinite both;
     }
 
-    .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes typingBlink {
       0% { opacity: 0.2; transform: translateY(0); }
       20% { opacity: 1; transform: translateY(-3px); }
       100% { opacity: 0.2; transform: translateY(0); }
+    }
+
+    /* Minecraft XP orbs */
+    body.theme-minecraft .typing-indicator .typing-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff 0, #b4ff5a 40%, #4b7f1a 100%);
+      box-shadow: 0 0 6px rgba(128, 255, 0, 0.8);
+      animation: xpBounce 1.2s infinite ease-in-out;
+    }
+
+    body.theme-minecraft .typing-indicator .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+    body.theme-minecraft .typing-indicator .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes xpBounce {
+      0% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+      60% { transform: translateY(0); opacity: 0.7; }
+      100% { transform: translateY(0); opacity: 0.4; }
+    }
+
+    /* Geometry Dash cube bounce */
+    body.theme-gd .typing-indicator {
+      border-radius: 4px;
+    }
+
+    body.theme-gd .typing-indicator .typing-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background: linear-gradient(135deg, #ffd23b 0%, #ffb300 40%, #c47a00 100%);
+      border: 2px solid #000;
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.9),
+        0 0 8px rgba(255,210,59,0.9);
+      animation: cubeBounce 0.9s infinite ease-in-out;
+    }
+
+    body.theme-gd .typing-indicator .typing-dot:nth-child(2) { animation-delay: 0.12s; }
+    body.theme-gd .typing-indicator .typing-dot:nth-child(3) { animation-delay: 0.24s; }
+
+    @keyframes cubeBounce {
+      0% { transform: translateY(0) rotate(0deg); }
+      30% { transform: translateY(-6px) rotate(-8deg); }
+      60% { transform: translateY(0) rotate(4deg); }
+      100% { transform: translateY(0) rotate(0deg); }
     }
 
     /* BOTTOM BAR */
@@ -272,7 +675,16 @@
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid var(--accent-soft);
-      background: rgba(5, 10, 5, 0.95);
+      background: var(--bg-panel);
+    }
+
+    body.theme-minecraft .bottom-bar,
+    body.theme-gd .bottom-bar {
+      border-radius: 6px;
+      border: 2px solid #000;
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
     }
 
     #chatInput {
@@ -283,6 +695,14 @@
       color: var(--text-main);
       padding: 8px 10px;
       font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    body.theme-minecraft #chatInput,
+    body.theme-gd #chatInput {
+      border-radius: 4px;
+      border: 2px solid #000;
+      font-size: 0.85rem;
     }
 
     .send-btn {
@@ -294,6 +714,29 @@
       color: #000;
       cursor: pointer;
       font-size: 1rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .send-btn:hover {
+      background: #a8ffb0;
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .send-btn,
+    body.theme-gd .send-btn {
+      width: 36px;
+      height: 28px;
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: rgba(128, 255, 0, 0.85);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    body.theme-minecraft .send-btn:hover,
+    body.theme-gd .send-btn:hover {
+      background: rgba(160, 255, 80, 1);
     }
 
     /* PLUS BUTTON */
@@ -307,13 +750,36 @@
       color: var(--accent);
       font-size: 1.2rem;
       cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .plus-btn:hover {
+      background: rgba(10, 30, 10, 0.8);
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .plus-btn,
+    body.theme-gd .plus-btn {
+      width: 34px;
+      height: 28px;
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: var(--btn-bg);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    body.theme-minecraft .plus-btn:hover,
+    body.theme-gd .plus-btn:hover {
+      background: var(--btn-bg-hover);
     }
 
     /* MODEL SELECTOR */
 
     .model-select {
       position: relative;
-      width: 170px;
+      width: 180px;
       user-select: none;
     }
 
@@ -330,6 +796,17 @@
       text-overflow: ellipsis;
     }
 
+    body.theme-minecraft .model-selected,
+    body.theme-gd .model-selected {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: var(--btn-bg);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+      font-size: 0.75rem;
+    }
+
     .model-options {
       position: absolute;
       top: 110%;
@@ -338,11 +815,19 @@
       background: rgba(15, 25, 15, 0.9);
       border: 1px solid rgba(76, 175, 80, 0.3);
       border-radius: 10px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       display: none;
       flex-direction: column;
       z-index: 9999;
+    }
+
+    body.theme-minecraft .model-options,
+    body.theme-gd .model-options {
+      border-radius: 6px;
+      border: 2px solid #000;
+      background: rgba(10, 20, 10, 0.98);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
     }
 
     .model-option {
@@ -350,15 +835,22 @@
       cursor: pointer;
       color: var(--text-main);
       font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .model-option .sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
     }
 
     .model-option:hover {
       background: rgba(76, 175, 80, 0.15);
     }
 
-    .model-option .sub {
-      font-size: 0.7rem;
-      color: var(--text-muted);
+    body.theme-gd .model-option:hover {
+      background: rgba(255, 210, 59, 0.18);
     }
 
     /* + POPUP */
@@ -387,6 +879,16 @@
       max-width: 260px;
     }
 
+    body.theme-minecraft .plus-popup-inner,
+    body.theme-gd .plus-popup-inner {
+      border-radius: 6px;
+      border: 2px solid #000;
+      background: rgba(10, 20, 10, 0.98);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
     .close-plus {
       margin-top: 10px;
       padding: 6px 14px;
@@ -396,6 +898,27 @@
       color: #000;
       cursor: pointer;
       font-size: 0.85rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .close-plus:hover {
+      background: #a8ffb0;
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .close-plus,
+    body.theme-gd .close-plus {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: rgba(128, 255, 0, 0.85);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    body.theme-minecraft .close-plus:hover,
+    body.theme-gd .close-plus:hover {
+      background: rgba(160, 255, 80, 1);
     }
 
     /* PAGE OVERLAY (ABOUT / SETTINGS) */
@@ -403,7 +926,7 @@
     .page-overlay {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at top, #050c06 0, #020403 40%, #000 100%);
+      background: var(--bg-main);
       display: none;
       flex-direction: column;
       padding: 40px 20px;
@@ -411,31 +934,115 @@
       overflow-y: auto;
     }
 
-    .page-overlay h1 {
-      font-size: 1.4rem;
-      color: var(--accent);
-      margin-bottom: 16px;
+    .page-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      background: rgba(5, 10, 5, 0.96);
+      border-radius: 18px;
+      padding: 20px;
+      border: 1px solid var(--accent-soft);
     }
 
-    .page-overlay p {
-      font-size: 0.95rem;
+    body.theme-minecraft .page-inner,
+    body.theme-gd .page-inner {
+      border-radius: 6px;
+      border: 2px solid #000;
+      background: rgba(10, 20, 10, 0.96);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    .page-inner h1 {
+      font-size: 1.2rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .page-inner p {
+      font-size: 0.9rem;
       color: var(--text-main);
-      max-width: 700px;
       line-height: 1.5;
+      margin-bottom: 8px;
     }
 
     .closePage {
-      margin-top: 20px;
+      margin-top: 16px;
       padding: 6px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(76, 175, 80, 0.6);
+      border: 1px solid var(--accent-soft);
       background: rgba(10, 20, 10, 0.35);
-      color: #b9ffbf;
+      color: var(--accent);
       cursor: pointer;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       font-size: 0.85rem;
-      align-self: flex-start;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .closePage:hover {
+      background: rgba(10, 30, 10, 0.9);
+      transform: translateY(-1px);
+    }
+
+    body.theme-minecraft .closePage,
+    body.theme-gd .closePage {
+      border-radius: 4px;
+      border: 2px solid #000;
+      background: var(--btn-bg);
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,0.7),
+        0 0 0 4px rgba(255,255,255,0.05);
+    }
+
+    body.theme-minecraft .closePage:hover,
+    body.theme-gd .closePage:hover {
+      background: var(--btn-bg-hover);
+    }
+
+    @media (max-width: 700px) {
+      #app {
+        padding: 10px 8px 12px;
+      }
+
+      .top-bar {
+        margin-left: 40px;
+        padding: 8px 10px;
+      }
+
+      .bottom-bar {
+        padding: 6px 8px;
+        gap: 6px;
+      }
+
+      .model-select {
+        width: 150px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .top-bar {
+        flex-wrap: wrap;
+      }
+
+      .top-center {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 6px;
+      }
+
+      .theme-select {
+        width: 180px;
+      }
+
+      .model-select {
+        width: 140px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .model-select {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -443,10 +1050,14 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
-  <div class="sidebar-main">
-    <button class="sidebar-item" id="navConversation">💬 Conversation</button>
+  <div>
+    <div class="sidebar-title">Menu</div>
+    <div class="sidebar-main">
+      <button class="sidebar-item" id="navConversation">💬 Conversation</button>
+    </div>
   </div>
   <div class="sidebar-bottom">
+    <div class="sidebar-title">Info</div>
     <button class="sidebar-item" id="navAbout">ℹ️ About</button>
     <button class="sidebar-item" id="navSettings">⚙️ Settings</button>
   </div>
@@ -458,8 +1069,38 @@
 
   <!-- TOP BAR -->
   <header class="top-bar">
-    <div class="top-title">IMFT | Chat with rReplay</div>
-    <button id="contactToggle" class="contact-btn">Contact Me</button>
+    <div class="top-left">
+      <div class="top-title">rReplay</div>
+    </div>
+
+    <div class="top-center">
+      <!-- THEME DROPDOWN -->
+      <div class="theme-select" id="themeSelect">
+        <div class="theme-selected" id="themeSelected">Default</div>
+        <div class="theme-options" id="themeOptions">
+
+          <div class="theme-option" data-theme="default">
+            <span class="theme-option-title">Default</span>
+            <span class="theme-option-sub">The default green theme</span>
+          </div>
+
+          <div class="theme-option" data-theme="minecraft">
+            <span class="theme-option-title">Minecraft</span>
+            <span class="theme-option-sub">A cool Minecraft theme</span>
+          </div>
+
+          <div class="theme-option" data-theme="gd">
+            <span class="theme-option-title">Geometry Dash</span>
+            <span class="theme-option-sub">A vibrant GD theme</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="top-right">
+      <button id="contactToggle" class="contact-btn">Contact</button>
+    </div>
 
     <!-- CONTACT POPUP -->
     <div id="contactPopup" class="contact-popup">
@@ -480,9 +1121,9 @@
     <div id="chatArea" class="chat-area">
       <!-- TYPING BUBBLE -->
       <div id="typingIndicator" class="typing-indicator">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
       </div>
     </div>
   </main>
@@ -502,7 +1143,7 @@
         </div>
         <div class="model-option" data-model="rReplay BETA R1">
           <strong>rReplay BETA R1</strong>
-          <div class="sub">Empowered by llama‑3.1‑8b</div>
+          <div class="sub">Empowered by llama‑3.1‑8b‑instant</div>
         </div>
       </div>
     </div>
@@ -521,22 +1162,59 @@
   </div>
 </div>
 
+<!-- PAGE OVERLAY (ABOUT / SETTINGS) -->
+<div id="pageOverlay" class="page-overlay">
+  <div class="page-inner" id="pageInner"></div>
+</div>
 <script>
-  /* === AI PERSONALITY === */
-  const AI_PERSONALITY = `
+  /* === AI PERSONALITY SYSTEM === */
+  const BASE_PERSONALITY = `
 You are rReplay, an AI assistant.
 You speak clearly, helpfully, and with confidence.
 You keep answers short and simple unless the user asks for detail.
 You, the AI on the website imformaltime.com (nothing else. Not informalTime, just imformaltime.com), were made by Eidan, a developer who loves coding.
 You, the AI model itself, were developed by Meta.
 You reason like ChatGPT, have the real-time edge of Grok, and the vast context of Gemini.
-If the user asks, your creator's youtube channel is I'mFormaltime. The youtube link is www.youtube.com/@letsGame0925
 `;
 
-  /* ====== BACKEND CHAT (SIMPLE, NO RETRY) ====== */
+  const MINECRAFT_FLAVOR = `
+You are currently in Minecraft theme mode.
+You speak like a friendly, knowledgeable Minecraft guide.
+You use light Minecraft flavor in your responses:
+- references to mining, crafting, mobs, biomes, redstone, enchantments
+- playful lines like "let's craft a solution" or "mining through your question"
+You do NOT roleplay as a character or mob.
+You do NOT pretend to be in the game world.
+You simply talk with a Minecraft vibe.
+You keep answers helpful, simple, and fun.
+`;
+
+  const GD_FLAVOR = `
+You are currently in Geometry Dash theme mode.
+You speak with energetic, upbeat, rhythmic language.
+You use light GD flavor:
+- references to cubes, jumps, spikes, levels, orbs, portals
+- phrases like "let's jump into it" or "dodging obstacles in your question"
+You do NOT roleplay as a cube or character.
+You do NOT pretend to be inside the game world.
+You simply talk with a Geometry Dash vibe.
+You keep answers helpful, simple, and fun.
+`;
+
+  function getPersonality() {
+    if (document.body.classList.contains("theme-minecraft")) {
+      return BASE_PERSONALITY + MINECRAFT_FLAVOR;
+    }
+    if (document.body.classList.contains("theme-gd")) {
+      return BASE_PERSONALITY + GD_FLAVOR;
+    }
+    return BASE_PERSONALITY;
+  }
+
+  /* ====== BACKEND CHAT ====== */
   async function sendMessage(message) {
     const payload = {
-      message: AI_PERSONALITY + "\nUser: " + message
+      message: getPersonality() + "\\nUser: " + message
     };
 
     const response = await fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
@@ -603,53 +1281,47 @@ If the user asks, your creator's youtube channel is I'mFormaltime. The youtube l
   };
 
   /* ====== PAGE OVERLAY SYSTEM ====== */
-  function getOverlay() {
-    let overlay = document.getElementById("pageOverlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "pageOverlay";
-      overlay.className = "page-overlay";
-      document.body.appendChild(overlay);
-    }
-    return overlay;
-  }
+  const pageOverlay = document.getElementById("pageOverlay");
+  const pageInner = document.getElementById("pageInner");
 
   function openPage(title, contentHtml) {
-    const overlay = getOverlay();
-    overlay.innerHTML = `
+    pageInner.innerHTML = `
       <h1>${title}</h1>
       ${contentHtml}
       <button class="closePage">Close</button>
     `;
-    overlay.style.display = "flex";
+    pageOverlay.style.display = "flex";
 
-    const closeBtn = overlay.querySelector(".closePage");
+    const closeBtn = pageInner.querySelector(".closePage");
     closeBtn.onclick = () => {
-      overlay.style.display = "none";
+      pageOverlay.style.display = "none";
     };
   }
 
   /* ====== NAV BUTTONS ====== */
   document.getElementById("navConversation").onclick = () => {
     sidebar.classList.remove("open");
-    const overlay = document.getElementById("pageOverlay");
-    if (overlay) overlay.style.display = "none";
+    pageOverlay.style.display = "none";
   };
 
   document.getElementById("navAbout").onclick = () => {
     sidebar.classList.remove("open");
-    openPage("About", `
-      <p>
-        Hello from rReplay! rReplay is a small AI model developed by me (duh),
-        and can do some basic tasks. Heres one tip: Don't ask it to code anything
-        for you! rReplay is TERRIBLE at coding!
-      </p>
+    openPage("About rReplay", `
+      <p>rReplay is a small AI assistant built by Eidan.</p>
+      <p>It can help you with questions, ideas, and experiments.</p>
+      <p>Switch themes to change how rReplay behaves and speaks.</p>
     `);
   };
 
   document.getElementById("navSettings").onclick = () => {
     sidebar.classList.remove("open");
-    openPage("Settings", `<p>Coming Soon...</p>`);
+    openPage("Settings", `
+      <p>Settings are still under construction.</p>
+      <p>Future ideas:</p>
+      <p>- More themes</p>
+      <p>- Response length controls</p>
+      <p>- Personality sliders</p>
+    `);
   };
 
   /* ====== CONTACT POPUP ====== */
@@ -701,6 +1373,43 @@ If the user asks, your creator's youtube channel is I'mFormaltime. The youtube l
   closePlus.onclick = () => {
     plusPopup.style.display = "none";
   };
+
+  /* ====== THEME DROPDOWN LOGIC ====== */
+  const themeSelected = document.getElementById("themeSelected");
+  const themeOptions = document.getElementById("themeOptions");
+
+  themeSelected.onclick = () => {
+    themeOptions.style.display =
+      themeOptions.style.display === "flex" ? "none" : "flex";
+  };
+
+  document.querySelectorAll(".theme-option").forEach(opt => {
+    opt.onclick = () => {
+      const theme = opt.dataset.theme;
+
+      document.body.classList.remove("theme-minecraft", "theme-gd");
+
+      if (theme === "minecraft") {
+        document.body.classList.add("theme-minecraft");
+        themeSelected.textContent = "Minecraft";
+      } else if (theme === "gd") {
+        document.body.classList.add("theme-gd");
+        themeSelected.textContent = "Geometry Dash";
+      } else {
+        themeSelected.textContent = "Default";
+      }
+
+      themeOptions.style.display = "none";
+    };
+  });
+
+  // Close theme dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    const themeSelect = document.getElementById("themeSelect");
+    if (!themeSelect.contains(e.target)) {
+      themeOptions.style.display = "none";
+    }
+  });
 </script>
 
 </body>
