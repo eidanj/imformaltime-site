@@ -212,7 +212,46 @@ body {
 }
 
 /* ————————————————
-   WINDOWS-STYLE GEMINI-GREEN LOADING BAR
+   CODESTARTING CUBE
+——————————————— */
+.codestarting-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.codestart-cube {
+  width: 18px;
+  height: 18px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: cubeSpin 1.6s infinite steps(4);
+}
+
+.cube-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #34c759;
+  border-radius: 4px;
+}
+
+@keyframes cubeSpin {
+  0%   { transform: rotateY(0deg); }
+  25%  { transform: rotateY(90deg); }
+  50%  { transform: rotateY(180deg); }
+  75%  { transform: rotateY(270deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+.codestart-text {
+  font-size: 0.9rem;
+  color: #34c759;
+  letter-spacing: 0.04em;
+}
+
+/* ————————————————
+   NORMAL LOADING BAR
 ——————————————— */
 .thinking-bar {
   width: 120px;
@@ -542,13 +581,13 @@ body {
     <!-- SETTINGS PAGE -->
     <section class="page" id="settingsPage">
       <h1>Settings</h1>
-      <p>Adjust how rReplay behaves and looks. More options coming soon.</p>
+      <p>Settings coming soon. Will add: Model Select, Design Select, Theme Select, etc.</p>
     </section>
 
     <!-- ABOUT PAGE -->
     <section class="page" id="aboutPage">
       <h1>About rReplay</h1>
-      <p>rReplay is a clean, minimal workspace designed by Eidan. It can be used for small tasks, such as math and conversations.</p>
+      <p>rReplay is a clean, minimal workspace designed by Eidan (His YouTube channel link is youtube.com/@letsGame0925)</p>
     </section>
 
   </main>
@@ -579,7 +618,7 @@ const conversationPage = document.getElementById("conversationPage");
 const settingsPage = document.getElementById("settingsPage");
 const aboutPage = document.getElementById("aboutPage");
 
-// MODEL DROPDOWN
+// Model dropdown
 const modelDropdown = document.getElementById("modelDropdown");
 const modelDropdownToggle = document.getElementById("modelDropdownToggle");
 const modelDropdownMenu = document.getElementById("modelDropdownMenu");
@@ -588,9 +627,19 @@ const modelOptions = Array.from(document.querySelectorAll(".model-option"));
 
 let currentModel = "rReplay BETA 0.1";
 
-// STOP GENERATION STATE
+// PERSONALITY PREFIX
+const AI_PERSONALITY = `
+You are rReplay, an AI assistant who speaks clearly, helpfully, and with confidence.
+You keep answers short and simple unless the user asks for detail.
+You were created by Eidan, a developer who loves coding.
+You always stay friendly, smart, and consistent.
+Your LLM model is Llama 3.3 70B, made by Meta, but you do not say that unless the user asks.
+`;
+
+// STOP + CODESTART STATE
 let generationActive = false;
 let abortController = null;
+let firstMessage = true;
 
 // PAGE SWITCHER
 function setActivePage(page) {
@@ -641,7 +690,7 @@ toggleSidebarBtn.onclick = () => {
   }
 };
 
-// MODEL DROPDOWN LOGIC
+// MODEL DROPDOWN
 modelDropdownToggle.addEventListener("click", () => {
   modelDropdownMenu.classList.toggle("open");
 });
@@ -656,25 +705,19 @@ modelOptions.forEach((opt) => {
   opt.addEventListener("click", () => {
     modelOptions.forEach((o) => o.classList.remove("active"));
     opt.classList.add("active");
-    const model = opt.getAttribute("data-model");
-    currentModel = model;
-    modelDropdownLabel.textContent = model;
+    currentModel = opt.getAttribute("data-model");
+    modelDropdownLabel.textContent = currentModel;
     modelDropdownMenu.classList.remove("open");
   });
 });
 
-// PLUS BUTTON POPUP
+// POPUP
 const plusBtn = document.getElementById("plusBtn");
 const uploadPopup = document.getElementById("uploadPopup");
 const closePopup = document.getElementById("closePopup");
 
-plusBtn.onclick = () => {
-  uploadPopup.style.display = "block";
-};
-
-closePopup.onclick = () => {
-  uploadPopup.style.display = "none";
-};
+plusBtn.onclick = () => uploadPopup.style.display = "block";
+closePopup.onclick = () => uploadPopup.style.display = "none";
 
 // CHAT FUNCTIONS
 function addUserMessage(text) {
@@ -682,40 +725,50 @@ function addUserMessage(text) {
   msg.className = "message";
   msg.innerHTML = `<div class="user-bubble">${text}</div>`;
   chatContainer.appendChild(msg);
-  chatContainer.parentElement.scrollTop =
-    chatContainer.parentElement.scrollHeight;
+  chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
 }
 
-function addThinkingMessage() {
+function addThinkingMessage(isCodestarting) {
   const msg = document.createElement("div");
   msg.className = "message";
-  msg.innerHTML = `
-    <div class="ai-bubble">
-      <div class="thinking-bar">
-        <div class="bar-fill"></div>
-      </div>
-    </div>`;
+
+  if (isCodestarting) {
+    msg.innerHTML = `
+      <div class="ai-bubble codestarting-wrap">
+        <div class="codestart-cube">
+          <div class="cube-face"></div>
+          <div class="cube-face"></div>
+          <div class="cube-face"></div>
+          <div class="cube-face"></div>
+        </div>
+        <span class="codestart-text">Codestarting</span>
+      </div>`;
+  } else {
+    msg.innerHTML = `
+      <div class="ai-bubble">
+        <div class="thinking-bar">
+          <div class="bar-fill"></div>
+        </div>
+      </div>`;
+  }
+
   chatContainer.appendChild(msg);
-  chatContainer.parentElement.scrollTop =
-    chatContainer.parentElement.scrollHeight;
+  chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
   return msg;
 }
 
 function replaceThinkingWithReply(msgElement, text) {
   msgElement.innerHTML = `<div class="ai-bubble">${text}</div>`;
-  chatContainer.parentElement.scrollTop =
-    chatContainer.parentElement.scrollHeight;
+  chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
 }
 
-// SEND MESSAGE WITH STOP SUPPORT
+// SEND MESSAGE
 async function sendMessage() {
   const text = userInput.value.trim();
   if (!text || generationActive) return;
 
   addUserMessage(text);
   userInput.value = "";
-
-  const thinkingMsg = addThinkingMessage();
 
   // Switch buttons
   sendBtn.style.display = "none";
@@ -724,31 +777,56 @@ async function sendMessage() {
   generationActive = true;
   abortController = new AbortController();
 
+  // CODESTARTING LOGIC
+  let thinkingMsg = null;
+
+  if (firstMessage) {
+    thinkingMsg = addThinkingMessage(true);
+
+    // Wait 2 seconds before switching to normal loading bar
+    await new Promise(res => setTimeout(res, 2000));
+
+    thinkingMsg.innerHTML = `
+      <div class="ai-bubble">
+        <div class="thinking-bar">
+          <div class="bar-fill"></div>
+        </div>
+      </div>`;
+  } else {
+    thinkingMsg = addThinkingMessage(false);
+  }
+
   try {
     const res = await fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, model: currentModel }),
-      signal: abortController.signal,
+      body: JSON.stringify({
+        message: AI_PERSONALITY + "\nUser: " + text,
+        model: currentModel
+      }),
+      signal: abortController.signal
     });
 
     const data = await res.json();
 
-    if (!generationActive) return; // stopped manually
+    if (!generationActive) return;
 
     replaceThinkingWithReply(thinkingMsg, data.reply || "(No reply)");
   } catch (err) {
     if (err.name === "AbortError") {
       replaceThinkingWithReply(thinkingMsg, "rReplay generation stopped");
     } else {
-      console.error(err);
       replaceThinkingWithReply(thinkingMsg, "Error contacting server.");
     }
   }
 
+  // Reset state
   generationActive = false;
   sendBtn.style.display = "inline-flex";
   stopBtn.style.display = "none";
+
+  // Codestarting only once per page reload
+  firstMessage = false;
 }
 
 // STOP BUTTON
@@ -760,15 +838,15 @@ stopBtn.onclick = () => {
   stopBtn.style.display = "none";
 };
 
-// BUTTON + ENTER HANDLERS
-sendBtn.onclick = sendMessage;
-
+// ENTER KEY
 userInput.onkeydown = (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
   }
 };
+
+sendBtn.onclick = sendMessage;
 </script>
 </body>
 </html>
