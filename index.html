@@ -598,6 +598,38 @@ body {
     <button id="closePopup">Close</button>
   </div>
 <script>
+
+// Send a tiny fake message every 4 minutes to keep backend awake
+setInterval(() => {
+  fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: "ping",
+      model: "rReplay BETA 0.1"
+    })
+  })
+  .then(() => console.log("AI Codestart prevention pinged"))
+  .catch(() => {});
+}, 4 * 60 * 1000); // every 4 minutes
+  function scheduleKeepAlive() {
+  const jitter = Math.random() * 30000; // 0–30 seconds
+  setTimeout(() => {
+    fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "ping",
+        model: "rReplay BETA 0.1"
+      })
+    }).catch(() => {});
+
+    scheduleKeepAlive(); // schedule next ping
+  }, 4 * 60 * 1000 + jitter);
+}
+
+scheduleKeepAlive();
+  
 // DOM ELEMENTS
 const chatContainer = document.getElementById("chat-container");
 const userInput = document.getElementById("userInput");
