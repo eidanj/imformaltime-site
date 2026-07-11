@@ -19,6 +19,7 @@
   --bg-input: rgba(255, 255, 255, 0.04);
   --brand-primary: #ffffff;
   --brand-primary-soft: rgba(255, 255, 255, 0.10);
+  --on-brand: #000000;
   --text-high: #f5f5f5;
   --text-med: #b7b7b7;
   --text-low: #7d7d7d;
@@ -28,6 +29,32 @@
   --radius-pill: 100px;
   --input-max-w: 760px;
 }
+
+/* Light theme: page + chrome flips to white with black text/icons.
+   The matrix-ocean canvas itself is untouched — see #matrixCanvas rules. */
+html[data-theme="light"] {
+  --bg-page: #ffffff;
+  --bg-sidebar: rgba(255, 255, 255, 0.65);
+  --bg-input: rgba(0, 0, 0, 0.04);
+  --brand-primary: #000000;
+  --brand-primary-soft: rgba(0, 0, 0, 0.08);
+  --on-brand: #ffffff;
+  --text-high: #111111;
+  --text-med: #4a4a4a;
+  --text-low: #8a8a8a;
+  --border-subtle: rgba(0, 0, 0, 0.10);
+  --border-strong: rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="light"] .header-bar { background: rgba(255, 255, 255, 0.55); }
+html[data-theme="light"] .composer { background: rgba(255, 255, 255, 0.65); }
+html[data-theme="light"] .model-dropdown-menu { background: rgba(255, 255, 255, 0.92); }
+html[data-theme="light"] .model-dropdown-toggle { background: rgba(0, 0, 0, 0.03); }
+html[data-theme="light"] .user-bubble { background: rgba(0, 0, 0, 0.05); }
+html[data-theme="light"] .thinking-bar { background: rgba(0, 0, 0, 0.08); }
+html[data-theme="light"] .input-region { background: linear-gradient(to top, rgba(255,255,255,0.75) 60%, transparent); }
+html[data-theme="light"] #stopBtn { background: #1a1a1a; color: #fff; }
+html[data-theme="light"] #sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.08); }
 
 * {
   margin: 0;
@@ -194,6 +221,21 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
+  gap: 12px;
+}
+
+.mobile-menu-btn {
+  display: none;
+  font-size: 26px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  color: var(--text-high);
+  transition: 0.2s;
+}
+
+.mobile-menu-btn:hover {
+  background: var(--brand-primary-soft);
 }
 
 /* ————————————————
@@ -238,6 +280,39 @@ body {
   margin-bottom: 28px;
 }
 
+/* ————————————————
+   WELCOME MESSAGE (empty-chat state)
+——————————————— */
+.welcome-message {
+  height: 100%;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: var(--text-med);
+  letter-spacing: -0.01em;
+  animation: welcomeFadeIn 0.5s ease;
+}
+
+@keyframes welcomeFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ————————————————
+   DISCLAIMER
+——————————————— */
+.disclaimer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-low);
+  margin-top: 10px;
+}
+
 .user-bubble {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(8px);
@@ -276,7 +351,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: #ffffff;
+  background: var(--text-high);
   border-radius: 4px;
 }
 
@@ -290,7 +365,7 @@ body {
 
 .codestart-text {
   font-size: 0.9rem;
-  color: #e6e6e6;
+  color: var(--text-med);
   letter-spacing: 0.04em;
 }
 
@@ -334,6 +409,8 @@ body {
   padding: 24px;
   background: linear-gradient(to top, rgba(0,0,0,0.6) 60%, transparent);
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
 
@@ -343,7 +420,7 @@ body {
   background: rgba(15, 15, 15, 0.65);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: 20px;
+  border-radius: 28px;
   padding: 12px 16px;
   border: 1px solid var(--border-subtle);
   display: flex;
@@ -394,7 +471,7 @@ body {
 }
 
 .btn-action-plus:hover {
-  color: #000;
+  color: var(--on-brand);
   background: var(--brand-primary);
   border-color: var(--brand-primary);
 }
@@ -478,7 +555,7 @@ body {
 
 #sendBtn {
   background: var(--brand-primary);
-  color: #000;
+  color: var(--on-brand);
 }
 
 #stopBtn {
@@ -492,46 +569,54 @@ body {
   transform: scale(1.08);
 }
 
-/* POPUP */
-#uploadPopup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(15, 15, 15, 0.92);
-  backdrop-filter: blur(16px);
-  border-radius: 16px;
-  padding: 24px;
-  width: 320px;
-  text-align: center;
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+/* ————————————————
+   IMAGE ATTACHMENT PREVIEW
+——————————————— */
+.image-preview-row {
   display: none;
-  z-index: 999;
-  color: var(--text-high);
+  padding: 4px 4px 0;
 }
 
-#uploadPopup h2 {
-  font-size: 1.2rem;
-  margin-bottom: 16px;
-  color: var(--text-high);
+.image-chip {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
 }
 
-#closePopup {
-  margin-top: 12px;
-  background: var(--brand-primary);
-  color: #000;
-  border: none;
-  padding: 10px 18px;
-  border-radius: var(--radius-pill);
+.image-chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-chip .remove-chip {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  font-size: 14px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: 0.2s;
-  font-weight: 600;
 }
 
-#closePopup:hover {
-  transform: scale(1.05);
+/* Thumbnail shown inside a sent user message */
+.user-bubble img.attached-image {
+  display: block;
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  object-fit: cover;
 }
 
 /* SETTINGS + ABOUT */
@@ -546,6 +631,182 @@ body {
   color: var(--text-med);
   max-width: 700px;
   line-height: 1.6;
+}
+
+/* ————————————————
+   SETTINGS — theme picker
+——————————————— */
+.settings-group {
+  margin-top: 32px;
+  max-width: 480px;
+}
+
+.settings-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-high);
+  margin-bottom: 14px;
+}
+
+.theme-options {
+  display: flex;
+  gap: 14px;
+}
+
+.theme-swatch {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-med);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.theme-swatch:hover {
+  border-color: var(--border-strong);
+}
+
+.theme-swatch.active {
+  border-color: var(--brand-primary);
+  color: var(--text-high);
+  font-weight: 600;
+}
+
+.swatch-preview {
+  width: 100%;
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.swatch-dark {
+  background: linear-gradient(135deg, #000 0%, #2a2a2a 100%);
+}
+
+.swatch-light {
+  background: linear-gradient(135deg, #ffffff 0%, #d8d8d8 100%);
+}
+
+.settings-hint {
+  margin-top: 14px;
+  font-size: 0.8rem;
+  color: var(--text-low);
+  max-width: 480px;
+}
+
+/* ————————————————
+   RESPONSIVE / MOBILE
+——————————————— */
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 20;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+  }
+
+  #sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+
+  /* On mobile, "collapsed" means fully hidden off-canvas, not icon-rail */
+  #sidebar.collapsed {
+    width: 260px;
+    transform: translateX(-100%);
+  }
+
+  #sidebar.collapsed .nav-text {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .header-bar {
+    padding: 0 16px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page {
+    padding: 16px;
+  }
+
+  #chat-scroller {
+    padding: 20px 0 16px;
+  }
+
+  #chat-container {
+    padding: 0 12px;
+  }
+
+  .user-bubble {
+    max-width: 88%;
+    padding: 10px 16px;
+  }
+
+  .input-region {
+    padding: 14px;
+  }
+
+  .composer {
+    padding: 10px 12px;
+    border-radius: 24px;
+  }
+
+  #userInput {
+    font-size: 1rem;
+    min-height: 38px;
+    padding: 6px 8px;
+  }
+
+  .model-dropdown {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .model-dropdown-toggle .label {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toolbar-left {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .logo-text {
+    font-size: 1.3rem;
+  }
+
+  #sendBtn,
+  #stopBtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .btn-action-plus {
+    width: 32px;
+    height: 32px;
+  }
 }
   </style>
 </head>
@@ -590,6 +851,7 @@ body {
   <main class="viewport" id="viewportMain">
 
     <header class="header-bar">
+      <div class="mobile-menu-btn material-symbols-rounded" id="mobileMenuToggle">menu</div>
       <div class="logo-text">
         rReplay<span class="beta-tag">BETA</span>
       </div>
@@ -605,13 +867,16 @@ body {
       <div class="input-region">
         <div class="composer">
 
+          <div class="image-preview-row" id="imagePreviewRow"></div>
+
           <textarea id="userInput" placeholder="Send a message..."></textarea>
 
           <div class="composer-toolbar">
 
             <div class="toolbar-left">
 
-              <div class="btn-action-plus material-symbols-rounded" id="plusBtn">add</div>
+              <div class="btn-action-plus material-symbols-rounded" id="plusBtn" title="Attach an image">add</div>
+              <input type="file" id="imageFileInput" accept="image/*" hidden />
 
               <div class="model-dropdown" id="modelDropdown">
                 <div class="model-dropdown-toggle" id="modelDropdownToggle">
@@ -639,6 +904,7 @@ body {
 
           </div>
         </div>
+        <p class="disclaimer">rReplay is an AI. Some information may not be accurate.</p>
       </div>
 
     </section>
@@ -646,7 +912,22 @@ body {
     <!-- SETTINGS PAGE -->
     <section class="page" id="settingsPage">
       <h1>Settings</h1>
-      <p>Settings coming soon. Will add: Model Select, Design Select, Theme Select, etc.</p>
+      <p>Personalize how rReplay looks. More options are on the way.</p>
+
+      <div class="settings-group">
+        <h2 class="settings-label">Color theme</h2>
+        <div class="theme-options">
+          <button class="theme-swatch active" id="themeDarkBtn" data-theme-choice="dark">
+            <span class="swatch-preview swatch-dark"></span>
+            Dark
+          </button>
+          <button class="theme-swatch" id="themeLightBtn" data-theme-choice="light">
+            <span class="swatch-preview swatch-light"></span>
+            Light
+          </button>
+        </div>
+        <p class="settings-hint">The symbol ocean background stays the same in both themes — only the interface flips.</p>
+      </div>
     </section>
 
     <!-- ABOUT PAGE -->
@@ -656,12 +937,6 @@ body {
     </section>
 
   </main>
-
-  <!-- POPUP -->
-  <div id="uploadPopup">
-    <h2>Upload Option Coming Soon!</h2>
-    <button id="closePopup">Close</button>
-  </div>
 
 <script>
 /* ————————————————————————————————————
@@ -846,7 +1121,37 @@ let currentModel = "rReplay BETA 0.2 (Lite)";
 let chatHistory = []; 
 let generationActive = false;
 let abortController = null;
-let firstMessage = true;
+
+// If the backend hasn't replied within this window, assume it's a cold
+// start (e.g. Render free tier spinning up) and switch the indicator.
+const CODESTART_THRESHOLD_MS = 4000;
+
+// --- WELCOME MESSAGE (shown on a fresh/empty conversation) ---
+const WELCOME_MESSAGES = [
+  "Hey, how's it going?",
+  "Ask anything",
+  "What's up?",
+  "Hi from rReplay! Now let me do the searching!",
+  "Ready when you are",
+  "What can I help with?",
+  "Let's get started",
+  "Good to see you",
+  "Type something to begin"
+];
+
+function showWelcomeMessage() {
+  hideWelcomeMessage();
+  const div = document.createElement("div");
+  div.id = "welcomeMessage";
+  div.className = "welcome-message";
+  div.textContent = WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)];
+  chatContainer.appendChild(div);
+}
+
+function hideWelcomeMessage() {
+  const el = document.getElementById("welcomeMessage");
+  if (el) el.remove();
+}
 
 const AI_PERSONALITY = `
 You are rReplay, an AI assistant who speaks clearly, helpfully, and with confidence.
@@ -893,6 +1198,7 @@ function setActivePage(page) {
 navNewChat.onclick = () => {
   chatContainer.innerHTML = "";
   chatHistory = [];
+  showWelcomeMessage();
   setActivePage("conversation");
 };
 
@@ -903,6 +1209,43 @@ navAbout.onclick = () => setActivePage("about");
 toggleSidebarBtn.onclick = () => {
   sidebar.classList.toggle("collapsed");
 };
+
+const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+mobileMenuToggle.onclick = (e) => {
+  e.stopPropagation();
+  sidebar.classList.toggle("collapsed");
+};
+
+// RESPONSIVE: sidebar closed by default on phones
+function isMobile() {
+  return window.matchMedia("(max-width: 768px)").matches;
+}
+
+if (isMobile()) {
+  sidebar.classList.add("collapsed");
+}
+
+// Tapping outside an open sidebar on mobile closes it
+document.addEventListener("click", (e) => {
+  if (
+    isMobile() &&
+    !sidebar.classList.contains("collapsed") &&
+    !sidebar.contains(e.target) &&
+    e.target !== toggleSidebarBtn
+  ) {
+    sidebar.classList.add("collapsed");
+  }
+});
+
+// Keep sidebar state sensible when crossing the mobile/desktop breakpoint
+let wasMobile = isMobile();
+window.addEventListener("resize", () => {
+  const nowMobile = isMobile();
+  if (nowMobile !== wasMobile) {
+    sidebar.classList.toggle("collapsed", nowMobile);
+    wasMobile = nowMobile;
+  }
+});
 
 // MODEL DROPDOWN
 modelDropdownToggle.addEventListener("click", () => {
@@ -925,50 +1268,90 @@ modelOptions.forEach((opt) => {
   });
 });
 
-// POPUP
+// IMAGE UPLOAD
 const plusBtn = document.getElementById("plusBtn");
-const uploadPopup = document.getElementById("uploadPopup");
-const closePopup = document.getElementById("closePopup");
+const imageFileInput = document.getElementById("imageFileInput");
+const imagePreviewRow = document.getElementById("imagePreviewRow");
+let pendingImage = null; // { dataUrl, mimeType, name }
 
-plusBtn.onclick = () => uploadPopup.style.display = "block";
-closePopup.onclick = () => uploadPopup.style.display = "none";
+plusBtn.onclick = () => imageFileInput.click();
+
+imageFileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    alert("Please choose an image file.");
+    imageFileInput.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    pendingImage = { dataUrl: reader.result, mimeType: file.type, name: file.name };
+    renderImagePreview();
+  };
+  reader.readAsDataURL(file);
+});
+
+function renderImagePreview() {
+  if (!pendingImage) {
+    imagePreviewRow.style.display = "none";
+    imagePreviewRow.innerHTML = "";
+    return;
+  }
+  imagePreviewRow.innerHTML = `
+    <div class="image-chip">
+      <img src="${pendingImage.dataUrl}" alt="${pendingImage.name}" />
+      <span class="remove-chip material-symbols-rounded" id="removeImageChip">close</span>
+    </div>`;
+  imagePreviewRow.style.display = "flex";
+  document.getElementById("removeImageChip").onclick = clearPendingImage;
+}
+
+function clearPendingImage() {
+  pendingImage = null;
+  imageFileInput.value = "";
+  renderImagePreview();
+}
 
 // CHAT UI HELPERS
-function addUserMessage(text) {
+function addUserMessage(text, imageDataUrl) {
+  hideWelcomeMessage();
   const msg = document.createElement("div");
   msg.className = "message";
-  msg.innerHTML = `<div class="user-bubble">${text}</div>`;
+  const imgHtml = imageDataUrl
+    ? `<img class="attached-image" src="${imageDataUrl}" alt="attached image" />`
+    : "";
+  msg.innerHTML = `<div class="user-bubble">${imgHtml}${text}</div>`;
   chatContainer.appendChild(msg);
   chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
 }
 
-function addThinkingMessage(isCodestarting) {
+function addThinkingMessage() {
   const msg = document.createElement("div");
   msg.className = "message";
-
-  if (isCodestarting) {
-    msg.innerHTML = `
-      <div class="ai-bubble codestarting-wrap">
-        <div class="codestart-cube">
-          <div class="cube-face"></div>
-          <div class="cube-face"></div>
-          <div class="cube-face"></div>
-          <div class="cube-face"></div>
-        </div>
-        <span class="codestart-text">Codestarting</span>
-      </div>`;
-  } else {
-    msg.innerHTML = `
-      <div class="ai-bubble">
-        <div class="thinking-bar">
-          <div class="bar-fill"></div>
-        </div>
-      </div>`;
-  }
-
+  msg.innerHTML = `
+    <div class="ai-bubble">
+      <div class="thinking-bar">
+        <div class="bar-fill"></div>
+      </div>
+    </div>`;
   chatContainer.appendChild(msg);
   chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
   return msg;
+}
+
+function switchToCodestarting(msgElement) {
+  msgElement.innerHTML = `
+    <div class="ai-bubble codestarting-wrap">
+      <div class="codestart-cube">
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
+      </div>
+      <span class="codestart-text">Codestarting</span>
+    </div>`;
+  chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
 }
 
 function replaceThinkingWithReply(msgElement, text) {
@@ -979,10 +1362,12 @@ function replaceThinkingWithReply(msgElement, text) {
 // --- SEND MESSAGE LOGIC ---
 async function sendMessage() {
   const text = userInput.value.trim();
-  if (!text || generationActive) return;
+  const image = pendingImage;
+  if ((!text && !image) || generationActive) return;
 
-  addUserMessage(text);
+  addUserMessage(text, image ? image.dataUrl : null);
   userInput.value = "";
+  clearPendingImage();
 
   sendBtn.style.display = "none";
   stopBtn.style.display = "inline-flex";
@@ -990,12 +1375,32 @@ async function sendMessage() {
   generationActive = true;
   abortController = new AbortController();
 
-  let thinkingMsg = addThinkingMessage(firstMessage);
+  let thinkingMsg = addThinkingMessage();
+
+  // Only show "Codestarting" if the response is actually taking a while —
+  // this reflects a real cold start rather than always firing on message 1.
+  const codestartTimer = setTimeout(() => {
+    switchToCodestarting(thinkingMsg);
+  }, CODESTART_THRESHOLD_MS);
 
   try {
+    // Gemini-style parts array: text plus, if present, an inline_data image part.
+    // The base64 payload has the "data:image/...;base64," prefix stripped —
+    // your backend still needs to forward this part to the model API itself.
+    const parts = [];
+    if (text) parts.push({ text: text });
+    if (image) {
+      parts.push({
+        inline_data: {
+          mime_type: image.mimeType,
+          data: image.dataUrl.split(",")[1]
+        }
+      });
+    }
+
     chatHistory.push({
       role: "user",
-      parts: [{ text: text }]
+      parts: parts
     });
 
     const res = await fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
@@ -1003,6 +1408,7 @@ async function sendMessage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: text,
+        image: image ? { mimeType: image.mimeType, data: image.dataUrl.split(",")[1] } : null,
         history: chatHistory,
         model: currentModel
       }),
@@ -1011,6 +1417,7 @@ async function sendMessage() {
 
     const data = await res.json();
 
+    clearTimeout(codestartTimer);
     if (!generationActive) return;
 
     if (data.reply) {
@@ -1023,6 +1430,7 @@ async function sendMessage() {
       replaceThinkingWithReply(thinkingMsg, data.error || "Server Error: No reply.");
     }
   } catch (err) {
+    clearTimeout(codestartTimer);
     if (err.name === "AbortError") {
       replaceThinkingWithReply(thinkingMsg, "rReplay generation stopped.");
     } else {
@@ -1033,7 +1441,6 @@ async function sendMessage() {
   generationActive = false;
   sendBtn.style.display = "inline-flex";
   stopBtn.style.display = "none";
-  firstMessage = false;
 }
 
 // STOP BUTTON
@@ -1054,6 +1461,22 @@ userInput.onkeydown = (e) => {
 };
 
 sendBtn.onclick = sendMessage;
+
+// THEME (Settings page)
+const themeDarkBtn = document.getElementById("themeDarkBtn");
+const themeLightBtn = document.getElementById("themeLightBtn");
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  themeDarkBtn.classList.toggle("active", theme === "dark");
+  themeLightBtn.classList.toggle("active", theme === "light");
+}
+
+themeDarkBtn.onclick = () => applyTheme("dark");
+themeLightBtn.onclick = () => applyTheme("light");
+
+// Show the welcome message on first load
+showWelcomeMessage();
 </script>
 </body>
 </html>
