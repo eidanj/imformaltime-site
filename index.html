@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -512,6 +511,8 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   z-index: 10;
   display: none;
+  max-height: 260px;
+  overflow-y: auto;
 }
 
 .model-dropdown-menu.open {
@@ -885,14 +886,29 @@ body {
                 </div>
 
                 <div class="model-dropdown-menu" id="modelDropdownMenu">
-                  <div class="model-option active" data-model="rReplay BETA 0.1">
-                    rReplay BETA 0.2
-                    <div class="sublabel">Empowered by gemini 2.5 flash</div>
+                  <div class="model-option active" data-model="gemini">
+                    <span class="option-label">rReplay BETA 0.2</span>
+                    <div class="sublabel">Empowered by Gemini 2.5 Flash‑Lite</div>
                   </div>
 
-                  <div class="model-option" data-model="rReplay BETA R1">
-                    rReplay BETA R1
-                    <div class="sublabel">Empowered by llama‑3.3‑70b‑versatile</div>
+                  <div class="model-option" data-model="llama3-70b">
+                    <span class="option-label">rReplay BETA R1</span>
+                    <div class="sublabel">Empowered by Llama 3.3 70B</div>
+                  </div>
+
+                  <div class="model-option" data-model="gpt4o-mini">
+                    <span class="option-label">rReplay BETA O1</span>
+                    <div class="sublabel">Empowered by GPT‑4o Mini</div>
+                  </div>
+
+                  <div class="model-option" data-model="deepseek-v4-flash">
+                    <span class="option-label">rReplay BETA D1</span>
+                    <div class="sublabel">Empowered by DeepSeek V4‑Flash</div>
+                  </div>
+
+                  <div class="model-option" data-model="gemma3">
+                    <span class="option-label">rReplay BETA G1</span>
+                    <div class="sublabel">Empowered by Gemma 3</div>
                   </div>
                 </div>
               </div>
@@ -1120,7 +1136,7 @@ const modelDropdownLabel = document.getElementById("modelDropdownLabel");
 const modelOptions = Array.from(document.querySelectorAll(".model-option"));
 
 // --- STATE & MEMORY ---
-let currentModel = "rReplay BETA 0.2 (Lite)";
+let currentModel = "gemini";
 let chatHistory = []; 
 let generationActive = false;
 let abortController = null;
@@ -1266,7 +1282,8 @@ modelOptions.forEach((opt) => {
     modelOptions.forEach((o) => o.classList.remove("active"));
     opt.classList.add("active");
     currentModel = opt.getAttribute("data-model");
-    modelDropdownLabel.textContent = currentModel;
+    const displayLabel = opt.querySelector(".option-label");
+    modelDropdownLabel.textContent = displayLabel ? displayLabel.textContent : currentModel;
     modelDropdownMenu.classList.remove("open");
   });
 });
