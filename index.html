@@ -27,6 +27,7 @@
   --radius-md: 12px;
   --radius-pill: 100px;
   --input-max-w: 760px;
+  --code-bg: rgba(255, 255, 255, 0.08);
 }
 
 /* Light theme: page + chrome flips to white with black text/icons.
@@ -43,6 +44,7 @@ html[data-theme="light"] {
   --text-low: #8a8a8a;
   --border-subtle: rgba(0, 0, 0, 0.10);
   --border-strong: rgba(0, 0, 0, 0.28);
+  --code-bg: rgba(0, 0, 0, 0.06);
 }
 
 html[data-theme="light"] .header-bar { background: rgba(255, 255, 255, 0.55); }
@@ -85,6 +87,8 @@ body {
   z-index: 0;
   background: #000;
   pointer-events: none;
+  filter: blur(3px);
+  transition: filter 0.2s ease;
 }
 
 /* Everything else sits above the canvas */
@@ -353,6 +357,33 @@ body {
   gap: 12px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.header-signin-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-high);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.header-signin-btn:hover {
+  background: var(--brand-primary-soft);
+}
+
 /* ————————————————
    BACKGROUND TOGGLE
 ——————————————— */
@@ -499,6 +530,38 @@ body {
   padding: 12px 0;
   color: var(--text-high);
   line-height: 1.6;
+}
+
+.ai-bubble strong,
+.user-bubble strong {
+  font-weight: 700;
+  color: var(--text-high);
+}
+
+.ai-bubble em,
+.user-bubble em {
+  font-style: italic;
+}
+
+.ai-bubble code,
+.user-bubble code {
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9em;
+}
+
+/* Word-by-word fade-in reveal, used for freshly generated replies */
+.fade-word {
+  display: inline-block;
+  opacity: 0;
+  animation: fadeWordIn 0.45s ease forwards;
+}
+
+@keyframes fadeWordIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ————————————————
@@ -974,6 +1037,18 @@ body {
     display: none;
   }
 
+  .header-signin-label {
+    display: none;
+  }
+
+  .header-signin-btn {
+    padding: 0 9px;
+  }
+
+  .header-right {
+    gap: 10px;
+  }
+
   #sendBtn,
   #stopBtn {
     width: 40px;
@@ -1015,11 +1090,6 @@ body {
     </div>
 
     <div class="nav-bottom">
-      <div class="account-box" id="accountBox">
-        <!-- Filled in by JS: either a "Sign in with Google" button or the
-             signed-in user's avatar + name + logout icon. -->
-      </div>
-
       <div class="nav-link" id="navSettings">
         <span class="material-symbols-rounded">settings</span>
         <span class="nav-text">Settings</span>
@@ -1028,6 +1098,12 @@ body {
       <div class="nav-link" id="navAbout">
         <span class="material-symbols-rounded">info</span>
         <span class="nav-text">About</span>
+      </div>
+
+      <div class="account-box" id="accountBox">
+        <!-- Filled in by JS only once signed in: avatar + name + logout icon.
+             Empty (nothing rendered) while signed out — the sign-in button
+             now lives in the header instead. -->
       </div>
     </div>
   </aside>
@@ -1043,13 +1119,20 @@ body {
         </div>
       </div>
 
-      <label class="bg-toggle" for="backgroundToggle">
-        <span class="bg-toggle-label">Background</span>
-        <span class="toggle-switch">
-          <input type="checkbox" id="backgroundToggle" checked />
-          <span class="toggle-slider"></span>
-        </span>
-      </label>
+      <div class="header-right">
+        <label class="bg-toggle" for="backgroundToggle">
+          <span class="bg-toggle-label">Background</span>
+          <span class="toggle-switch">
+            <input type="checkbox" id="backgroundToggle" checked />
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <a class="header-signin-btn" id="headerSigninBtn" href="https://llama-backend-1-qq3f.onrender.com/auth/google/login">
+          <span class="material-symbols-rounded" style="font-size:18px;">login</span>
+          <span class="header-signin-label">Sign in</span>
+        </a>
+      </div>
     </header>
 
     <!-- CONVERSATION PAGE -->
@@ -1096,7 +1179,7 @@ body {
                   </div>
 
                   <div class="model-option" data-model="deepseek-v4-flash">
-                    <span class="option-label">DEEPSEEK v4</span>
+                    <span class="option-label">DEEPSEEK V4</span>
                     <div class="sublabel">Empowered by DeepSeek V4‑Flash</div>
                   </div>
 
@@ -1122,7 +1205,7 @@ body {
     <!-- SETTINGS PAGE -->
     <section class="page" id="settingsPage">
       <h1>Settings</h1>
-      <p>Personalize how rReplay looks. More settings coming soon</p>
+      <p>Personalize how rReplay looks. More options coming soon.</p>
 
       <div class="settings-group">
         <h2 class="settings-label">Color theme</h2>
@@ -1136,14 +1219,14 @@ body {
             Light
           </button>
         </div>
-        <p class="settings-hint">Change the website theme (Dark/Light)</p>
+        <p class="settings-hint">Switch between Dark and Light mode.</p>
       </div>
     </section>
 
     <!-- ABOUT PAGE -->
     <section class="page" id="aboutPage">
       <h1>TERMS OF SERVICE</h1>
-      <p>. **Acceptance of Terms  
+      <p>**Acceptance of Terms  
 By accessing or using rReplay (the “Service”), you agree to these Terms of Service. If you do not agree, do not use the Service.**
 
         
@@ -1224,7 +1307,9 @@ We may update these Terms at any time.
 Continued use of the Service means you accept the updated Terms.
 
 14. Contact  
-If you have questions about these Terms, contact us at: eidanplaz@gmail.com  </p>
+If you have questions about these Terms, contact us at: eidanplaz@gmail.com 
+
+</p>
     </section>
 
   </main>
@@ -1669,8 +1754,69 @@ function switchToCodestarting(msgElement) {
   chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
 }
 
+// ————————————————————————————————
+// LIGHTWEIGHT MARKDOWN + FADE-IN REVEAL
+// ————————————————————————————————
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function renderMarkdown(text) {
+  let safe = escapeHtml(text);
+  safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  safe = safe.replace(/__(.+?)__/g, "<strong>$1</strong>");
+  safe = safe.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  safe = safe.replace(/`([^`]+?)`/g, "<code>$1</code>");
+  safe = safe.replace(/\n/g, "<br>");
+  return safe;
+}
+
+// Wraps each word in the rendered HTML with a staggered fade-in span, so
+// the reply visually reveals top-to-bottom as if it were streaming in.
+function applyFadeIn(container) {
+  let wordIndex = 0;
+  const STAGGER_MS = 22;
+
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const tokens = node.textContent.split(/(\s+)/);
+      const frag = document.createDocumentFragment();
+      tokens.forEach(tok => {
+        if (tok === "") return;
+        if (/^\s+$/.test(tok)) {
+          frag.appendChild(document.createTextNode(tok));
+        } else {
+          const span = document.createElement("span");
+          span.className = "fade-word";
+          span.textContent = tok;
+          span.style.animationDelay = `${wordIndex * STAGGER_MS}ms`;
+          wordIndex++;
+          frag.appendChild(span);
+        }
+      });
+      node.parentNode.replaceChild(frag, node);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      if (["STRONG", "EM", "CODE"].includes(node.tagName)) {
+        node.classList.add("fade-word");
+        node.style.animationDelay = `${wordIndex * STAGGER_MS}ms`;
+        wordIndex++;
+      } else {
+        Array.from(node.childNodes).forEach(walk);
+      }
+    }
+  }
+
+  Array.from(container.childNodes).forEach(walk);
+}
+
 function replaceThinkingWithReply(msgElement, text) {
-  msgElement.innerHTML = `<div class="ai-bubble">${text}</div>`;
+  msgElement.innerHTML = `<div class="ai-bubble"></div>`;
+  const bubble = msgElement.querySelector(".ai-bubble");
+  bubble.innerHTML = renderMarkdown(text);
+  applyFadeIn(bubble);
   chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
 }
 
@@ -1800,28 +1946,30 @@ themeLightBtn.onclick = () => applyTheme("light");
 
 // BACKGROUND TOGGLE (top bar)
 const backgroundToggle = document.getElementById("backgroundToggle");
+const matrixCanvasEl = document.getElementById("matrixCanvas");
 backgroundToggle.addEventListener("change", () => {
   if (window.setMatrixBackgroundEnabled) {
     window.setMatrixBackgroundEnabled(backgroundToggle.checked);
   }
+  matrixCanvasEl.style.filter = backgroundToggle.checked ? "blur(3px)" : "none";
 });
 
 // ————————————————————————————————
 // ACCOUNT (Google sign-in) + CHAT HISTORY
 // ————————————————————————————————
 const accountBox = document.getElementById("accountBox");
+const headerSigninBtn = document.getElementById("headerSigninBtn");
 const historyHeading = document.getElementById("historyHeading");
 const historyList = document.getElementById("historyList");
 
 function renderAccountBox() {
   if (!currentUser) {
-    accountBox.innerHTML = `
-      <a class="google-signin-btn" href="${BACKEND_URL}/auth/google/login">
-        <span class="material-symbols-rounded" style="font-size:18px;">login</span>
-        Sign in with Google
-      </a>`;
+    headerSigninBtn.style.display = "flex";
+    accountBox.innerHTML = "";
     return;
   }
+
+  headerSigninBtn.style.display = "none";
   accountBox.innerHTML = `
     <div class="account-signed-in">
       <img class="account-avatar" src="${currentUser.picture || ""}" alt="" />
@@ -1895,7 +2043,7 @@ async function loadConversation(id) {
       } else {
         const msg = document.createElement("div");
         msg.className = "message";
-        msg.innerHTML = `<div class="ai-bubble">${textPart ? textPart.text : ""}</div>`;
+        msg.innerHTML = `<div class="ai-bubble">${textPart ? renderMarkdown(textPart.text) : ""}</div>`;
         chatContainer.appendChild(msg);
       }
     });
