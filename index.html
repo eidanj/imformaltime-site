@@ -144,6 +144,116 @@ body {
   margin-top: auto;
 }
 
+/* ————————————————
+   CHAT HISTORY LIST
+——————————————— */
+.history-heading {
+  margin: 18px 16px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  display: none; /* shown by JS once the user is signed in and has history */
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  color: var(--text-med);
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: 0.2s;
+}
+
+.history-item:hover {
+  background: var(--brand-primary-soft);
+  color: var(--text-high);
+}
+
+.history-item.active {
+  background: var(--brand-primary-soft);
+  color: var(--text-high);
+  font-weight: 600;
+}
+
+/* ————————————————
+   ACCOUNT / LOGIN BOX
+——————————————— */
+.account-box {
+  padding: 0 12px 8px;
+}
+
+.google-signin-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 42px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-high);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  text-decoration: none;
+}
+
+.google-signin-btn:hover {
+  background: var(--brand-primary-soft);
+}
+
+.account-signed-in {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+}
+
+.account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--border-strong);
+}
+
+.account-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-high);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-logout-btn {
+  font-size: 20px;
+  color: var(--text-low);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.account-logout-btn:hover {
+  background: var(--brand-primary-soft);
+  color: var(--text-high);
+}
+
 .nav-link {
   height: 48px;
   display: flex;
@@ -235,6 +345,68 @@ body {
 
 .mobile-menu-btn:hover {
   background: var(--brand-primary-soft);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ————————————————
+   BACKGROUND TOGGLE
+——————————————— */
+.bg-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text-med);
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border-strong);
+  border-radius: 34px;
+  transition: 0.2s;
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--brand-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+  background: var(--on-brand);
 }
 
 /* ————————————————
@@ -798,6 +970,10 @@ body {
     font-size: 1.3rem;
   }
 
+  .bg-toggle-label {
+    display: none;
+  }
+
   #sendBtn,
   #stopBtn {
     width: 40px;
@@ -833,9 +1009,17 @@ body {
         <span class="material-symbols-rounded">chat</span>
         <span class="nav-text">Conversation</span>
       </div>
+
+      <div class="history-heading nav-text" id="historyHeading">Chat History</div>
+      <div id="historyList"></div>
     </div>
 
     <div class="nav-bottom">
+      <div class="account-box" id="accountBox">
+        <!-- Filled in by JS: either a "Sign in with Google" button or the
+             signed-in user's avatar + name + logout icon. -->
+      </div>
+
       <div class="nav-link" id="navSettings">
         <span class="material-symbols-rounded">settings</span>
         <span class="nav-text">Settings</span>
@@ -852,10 +1036,20 @@ body {
   <main class="viewport" id="viewportMain">
 
     <header class="header-bar">
-      <div class="mobile-menu-btn material-symbols-rounded" id="mobileMenuToggle">menu</div>
-      <div class="logo-text">
-        rReplay<span class="beta-tag">BETA</span>
+      <div class="header-left">
+        <div class="mobile-menu-btn material-symbols-rounded" id="mobileMenuToggle">menu</div>
+        <div class="logo-text">
+          rReplay<span class="beta-tag">BETA</span>
+        </div>
       </div>
+
+      <label class="bg-toggle" for="backgroundToggle">
+        <span class="bg-toggle-label">Background</span>
+        <span class="toggle-switch">
+          <input type="checkbox" id="backgroundToggle" checked />
+          <span class="toggle-slider"></span>
+        </span>
+      </label>
     </header>
 
     <!-- CONVERSATION PAGE -->
@@ -881,33 +1075,33 @@ body {
 
               <div class="model-dropdown" id="modelDropdown">
                 <div class="model-dropdown-toggle" id="modelDropdownToggle">
-                  <span class="label" id="modelDropdownLabel">rReplay BETA 0.2</span>
+                  <span class="label" id="modelDropdownLabel">GEMINI 2.5</span>
                   <span class="material-symbols-rounded">expand_more</span>
                 </div>
 
                 <div class="model-dropdown-menu" id="modelDropdownMenu">
                   <div class="model-option active" data-model="gemini">
-                    <span class="option-label">rReplay BETA 0.2</span>
+                    <span class="option-label">GEMINI 2.5</span>
                     <div class="sublabel">Empowered by Gemini 2.5 Flash‑Lite</div>
                   </div>
 
                   <div class="model-option" data-model="llama3-70b">
-                    <span class="option-label">rReplay BETA R1</span>
+                    <span class="option-label">LLAMA 3.3</span>
                     <div class="sublabel">Empowered by Llama 3.3 70B</div>
                   </div>
 
                   <div class="model-option" data-model="gpt4o-mini">
-                    <span class="option-label">rReplay BETA O1</span>
+                    <span class="option-label">CHATGPT 4o</span>
                     <div class="sublabel">Empowered by GPT‑4o Mini</div>
                   </div>
 
                   <div class="model-option" data-model="deepseek-v4-flash">
-                    <span class="option-label">rReplay BETA D1</span>
+                    <span class="option-label">DEEPSEEK v4</span>
                     <div class="sublabel">Empowered by DeepSeek V4‑Flash</div>
                   </div>
 
                   <div class="model-option" data-model="gemma3">
-                    <span class="option-label">rReplay BETA G1</span>
+                    <span class="option-label">GEMMA 3</span>
                     <div class="sublabel">Empowered by Gemma 3</div>
                   </div>
                 </div>
@@ -928,7 +1122,7 @@ body {
     <!-- SETTINGS PAGE -->
     <section class="page" id="settingsPage">
       <h1>Settings</h1>
-      <p>Personalize how rReplay looks. More options are on the way.</p>
+      <p>Personalize how rReplay looks. More settings coming soon</p>
 
       <div class="settings-group">
         <h2 class="settings-label">Color theme</h2>
@@ -942,26 +1136,29 @@ body {
             Light
           </button>
         </div>
-        <p class="settings-hint">The symbol ocean background stays the same in both themes — only the interface flips.</p>
+        <p class="settings-hint">Change the website theme (Dark/Light)</p>
       </div>
     </section>
 
     <!-- ABOUT PAGE -->
     <section class="page" id="aboutPage">
       <h1>TERMS OF SERVICE</h1>
-      <p>1. Acceptance of Terms  
-By accessing or using rReplay (the “Service”), you agree to these Terms of Service. If you do not agree, do not use the Service.
+      <p>. **Acceptance of Terms  
+By accessing or using rReplay (the “Service”), you agree to these Terms of Service. If you do not agree, do not use the Service.**
 
+        
 2. Eligibility  
-You must be at least 13 years old to use the Service. If you are under 18, you must have permission from a parent or legal guardian.
+You must be at least 13 years old to use the Service. If you are under 18, you need permission from a parent or legal guardian.
 
+        
 3. Accounts & Authentication  
-You can create an account using Google Sign-In.  
+You may create an account using Google Sign-In.  
 You agree to provide accurate information and keep your account secure.  
-You are responsible for all activity that happens under your account.  
-
+You are responsible for all activity that occurs under your account.  
+       
 We may suspend or terminate accounts that violate these Terms.
 
+        
 4. Use of the Service  
 You agree not to use the Service to:  
 - break any laws  
@@ -972,6 +1169,7 @@ You agree not to use the Service to:
 
 We may limit usage to prevent abuse or protect system stability.
 
+        
 5. AI Output Disclaimer  
 The Service uses AI models to generate responses.  
 AI output may be:  
@@ -983,35 +1181,42 @@ AI output may be:
 You agree not to rely on AI output for legal, medical, financial, or safety-critical decisions.  
 You are responsible for how you use the generated content.
 
+        
 6. User Content  
-You own the content you submit.  
+You keep ownership of the content you submit.  
 By using the Service, you allow us to store and process your content to provide the Service.  
 
 We do not sell your data.
 
+        
 7. Privacy  
 Your use of the Service is also governed by our Privacy Policy.  
 We use cookies to maintain login sessions (for example, session_token).
 
+        
 8. Rate Limits & Fair Use  
 We may apply rate limits or usage restrictions to ensure stable operation.  
-Excessive or automated usage may lead to temporary or permanent suspension.
+Excessive or automated usage may result in temporary or permanent suspension.
 
+        
 9. Service Availability  
 We may update, modify, or discontinue parts of the Service at any time.  
 We are not responsible for downtime, data loss, or service interruptions.
 
+        
 10. Third-Party Services  
-The Service integrates with third-party APIs (like Google, OpenAI, Groq, DeepSeek, Gemini).  
+The Service integrates with third-party APIs (for example, Google, OpenAI, Groq, DeepSeek, Gemini).  
 Their terms also apply when you use features powered by those services.
 
+        
 11. Termination  
 We may suspend or terminate your access if you violate these Terms.  
-You can stop using the Service at any time.
+You may stop using the Service at any time.
 
+        
 12. Limitation of Liability  
-To the fullest extent allowed by law:  
-We are not liable for damages resulting from your use of the Service.  
+To the fullest extent permitted by law:  
+We are not liable for any damages resulting from your use of the Service.  
 The Service is provided “as is” without warranties of any kind.
 
 13. Changes to Terms  
@@ -1019,7 +1224,7 @@ We may update these Terms at any time.
 Continued use of the Service means you accept the updated Terms.
 
 14. Contact  
-If you have questions about these Terms, contact us at:  </p>
+If you have questions about these Terms, contact us at: eidanplaz@gmail.com  </p>
     </section>
 
   </main>
@@ -1094,6 +1299,14 @@ If you have questions about these Terms, contact us at:  </p>
   const introDuration = 1200;
   let introDone = false;
 
+  // Toggled by the "Background" switch in the header. When false, the
+  // canvas still fills with the current theme's solid color, but the
+  // symbol field itself is skipped.
+  let backgroundEnabled = true;
+  window.setMatrixBackgroundEnabled = function (enabled) {
+    backgroundEnabled = enabled;
+  };
+
   function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
 
   function draw(timestamp) {
@@ -1110,6 +1323,12 @@ If you have questions about these Terms, contact us at:  </p>
 
     ctx.fillStyle = isLight ? "#ffffff" : "#000000";
     ctx.fillRect(0, 0, W, H);
+
+    if (!backgroundEnabled) {
+      // Plain solid background only — skip the symbol field entirely.
+      requestAnimationFrame(draw);
+      return;
+    }
 
     ctx.font = fontSize + "px monospace";
     ctx.textBaseline = "top";
@@ -1167,14 +1386,16 @@ If you have questions about these Terms, contact us at:  </p>
 </script>
 
 <script>
+const BACKEND_URL = "https://llama-backend-1-qq3f.onrender.com";
+
 // --- SINGLE BACKGROUND PING ---
 setInterval(() => {
-  fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
+  fetch(`${BACKEND_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       message: "ping",
-      model: "rReplay BETA 0.1"
+      model: "gemini"
     })
   })
   .then(() => console.log("Backend heartbeat sent"))
@@ -1210,6 +1431,8 @@ let currentModel = "gemini";
 let chatHistory = []; 
 let generationActive = false;
 let abortController = null;
+let currentConversationId = null; // null = guest chat or a not-yet-saved new chat
+let currentUser = null;           // filled in by checkAuth() on load
 
 // If the backend hasn't replied within this window, assume it's a cold
 // start (e.g. Render free tier spinning up) and switch the indicator.
@@ -1287,6 +1510,8 @@ function setActivePage(page) {
 navNewChat.onclick = () => {
   chatContainer.innerHTML = "";
   chatHistory = [];
+  currentConversationId = null;
+  document.querySelectorAll(".history-item.active").forEach(el => el.classList.remove("active"));
   showWelcomeMessage();
   setActivePage("conversation");
 };
@@ -1493,14 +1718,16 @@ async function sendMessage() {
       parts: parts
     });
 
-    const res = await fetch("https://llama-backend-1-qq3f.onrender.com/chat", {
+    const res = await fetch(`${BACKEND_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({
         message: text,
         image: image ? { mimeType: image.mimeType, data: image.dataUrl.split(",")[1] } : null,
         history: chatHistory,
-        model: currentModel
+        model: currentModel,
+        conversation_id: currentConversationId
       }),
       signal: abortController.signal
     });
@@ -1509,6 +1736,12 @@ async function sendMessage() {
 
     clearTimeout(codestartTimer);
     if (!generationActive) return;
+
+    if (data.conversation_id) {
+      const isNewConversation = currentConversationId === null;
+      currentConversationId = data.conversation_id;
+      if (isNewConversation) refreshHistoryList();
+    }
 
     if (data.reply) {
       chatHistory.push({
@@ -1565,8 +1798,119 @@ function applyTheme(theme) {
 themeDarkBtn.onclick = () => applyTheme("dark");
 themeLightBtn.onclick = () => applyTheme("light");
 
+// BACKGROUND TOGGLE (top bar)
+const backgroundToggle = document.getElementById("backgroundToggle");
+backgroundToggle.addEventListener("change", () => {
+  if (window.setMatrixBackgroundEnabled) {
+    window.setMatrixBackgroundEnabled(backgroundToggle.checked);
+  }
+});
+
+// ————————————————————————————————
+// ACCOUNT (Google sign-in) + CHAT HISTORY
+// ————————————————————————————————
+const accountBox = document.getElementById("accountBox");
+const historyHeading = document.getElementById("historyHeading");
+const historyList = document.getElementById("historyList");
+
+function renderAccountBox() {
+  if (!currentUser) {
+    accountBox.innerHTML = `
+      <a class="google-signin-btn" href="${BACKEND_URL}/auth/google/login">
+        <span class="material-symbols-rounded" style="font-size:18px;">login</span>
+        Sign in with Google
+      </a>`;
+    return;
+  }
+  accountBox.innerHTML = `
+    <div class="account-signed-in">
+      <img class="account-avatar" src="${currentUser.picture || ""}" alt="" />
+      <span class="account-name">${currentUser.name || currentUser.email}</span>
+      <span class="account-logout-btn material-symbols-rounded" id="logoutBtn" title="Sign out">logout</span>
+    </div>`;
+  document.getElementById("logoutBtn").onclick = async () => {
+    await fetch(`${BACKEND_URL}/auth/logout`, { method: "POST", credentials: "include" });
+    currentUser = null;
+    historyList.innerHTML = "";
+    historyHeading.style.display = "none";
+    renderAccountBox();
+  };
+}
+
+async function checkAuth() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/auth/me`, { credentials: "include" });
+    const data = await res.json();
+    currentUser = data.user || null;
+  } catch (e) {
+    currentUser = null;
+  }
+  renderAccountBox();
+  if (currentUser) refreshHistoryList();
+}
+
+async function refreshHistoryList() {
+  if (!currentUser) return;
+  try {
+    const res = await fetch(`${BACKEND_URL}/conversations`, { credentials: "include" });
+    if (!res.ok) return;
+    const convos = await res.json();
+
+    historyHeading.style.display = convos.length ? "block" : "none";
+    historyList.innerHTML = "";
+
+    convos.forEach(c => {
+      const item = document.createElement("div");
+      item.className = "history-item" + (c.id === currentConversationId ? " active" : "");
+      item.textContent = c.title || "New Chat";
+      item.onclick = () => loadConversation(c.id);
+      historyList.appendChild(item);
+    });
+  } catch (e) {
+    // Non-fatal — chat history is a convenience feature, not core functionality.
+  }
+}
+
+async function loadConversation(id) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/conversations/${id}`, { credentials: "include" });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    hideWelcomeMessage();
+    chatContainer.innerHTML = "";
+    chatHistory = [];
+    currentConversationId = data.id;
+
+    data.messages.forEach(m => {
+      chatHistory.push({ role: m.role, parts: m.parts });
+      const textPart = m.parts.find(p => p.text);
+      const imagePart = m.parts.find(p => p.inline_data);
+      const imageDataUrl = imagePart
+        ? `data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`
+        : null;
+
+      if (m.role === "user") {
+        addUserMessage(textPart ? textPart.text : "", imageDataUrl);
+      } else {
+        const msg = document.createElement("div");
+        msg.className = "message";
+        msg.innerHTML = `<div class="ai-bubble">${textPart ? textPart.text : ""}</div>`;
+        chatContainer.appendChild(msg);
+      }
+    });
+
+    document.querySelectorAll(".history-item").forEach(el => el.classList.remove("active"));
+    refreshHistoryList();
+    setActivePage("conversation");
+  } catch (e) {
+    // If loading fails, just leave the current view as-is.
+  }
+}
+
 // Show the welcome message on first load
 showWelcomeMessage();
+checkAuth();
 </script>
 </body>
 </html>
