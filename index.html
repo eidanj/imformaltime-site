@@ -453,6 +453,50 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
   gap: 10px;
   padding: 6px 4px;
   cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: 0.15s;
+}
+
+.account-signed-in:hover {
+  background: var(--brand-primary-soft);
+}
+
+.account-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--border-strong);
+}
+
+.account-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.account-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-high);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-plan {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--text-low);
+  letter-spacing: 0.02em;
+}
+
+.account-plan.plan-pro {
+  color: var(--text-med);
+  font-weight: 500;
 }
 
 .account-dropdown {
@@ -1520,7 +1564,7 @@ function updateLimitBanner() {
   const textEl = document.getElementById("mcLimitBannerText");
   if (!banner || !textEl) return;
 
-  if (!currentUser || mcFreeUsesLeft() > 0) {
+  if (!currentUser || currentUser.is_pro || mcFreeUsesLeft() > 0) {
     banner.style.display = "none";
     return;
   }
@@ -1544,11 +1588,16 @@ function renderAccountBox() {
   }
 
   headerSigninBtn.style.display = "none";
+  const planLabel = currentUser.is_pro ? "Pro" : "Free";
+  const planClass = currentUser.is_pro ? "account-plan plan-pro" : "account-plan";
   accountBox.innerHTML = `
-    <div class="account-signed-in" id="accountTrigger" style="cursor:pointer;" title="Account options">
+    <div class="account-signed-in" id="accountTrigger" title="Account options">
       <img class="account-avatar" src="${currentUser.picture || ""}" alt="" />
-      <span class="account-name">${currentUser.name || currentUser.email}</span>
-      <span class="material-symbols-rounded" style="font-size:18px;color:var(--text-low);">expand_more</span>
+      <div class="account-info">
+        <span class="account-name">${currentUser.name || currentUser.email}</span>
+        <span class="${planClass}">${planLabel}</span>
+      </div>
+      <span class="material-symbols-rounded" style="font-size:18px;color:var(--text-low);flex-shrink:0;">expand_more</span>
     </div>
     <div class="account-dropdown" id="accountDropdown" style="display:none;">
       <div class="account-dropdown-item" id="accountDropdownPro">
@@ -1750,7 +1799,7 @@ renderModelPickers(parseInt(mcChatCount.value,10));
 
 mcStartBtn.onclick=()=>{
   if (!currentUser) { showSigninPopup(); return; }
-  if (mcFreeUsesLeft() <= 0) { updateLimitBanner(); return; }
+  if (!currentUser.is_pro && mcFreeUsesLeft() <= 0) { updateLimitBanner(); return; }
   const models=Array.from(mcModelPickers.querySelectorAll(".mc-model-select")).map(s=>s.value);
   buildMultichatColumns(models); setActivePage("multichat");
 };
@@ -1824,9 +1873,9 @@ function sendMultiMessage() {
   // Must be signed in
   if (!currentUser) { showSigninPopup(); return; }
 
-  // Free tier limit check
+  // Free tier limit check — Pro users have unlimited access
   const usesLeft = mcFreeUsesLeft();
-  if (usesLeft <= 0) { updateLimitBanner(); return; }
+  if (!currentUser.is_pro && usesLeft <= 0) { updateLimitBanner(); return; }
 
   mcRecordSend();
   updateLimitBanner();
