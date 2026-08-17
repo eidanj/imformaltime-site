@@ -1015,10 +1015,15 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
 
           <p class="pro-note">You'll start a free trial first. If you keep your subscription after the trial, Stripe will charge your saved payment method automatically — no extra steps.</p>
 
-          <a class="pro-btn" href="https://buy.stripe.com/test_aFafZj9TQ8WTdVh8DL9oc00" target="_blank">
+          <button class="pro-btn" id="stripeCheckoutBtn" onclick="startStripeCheckout()">
             <span>⚡</span>
-            Start free trial with Stripe
-          </a>
+            <span id="stripeCheckoutLabel">Start free trial with Stripe</span>
+          </button>
+
+          <button class="pro-btn" id="stripePortalBtn" onclick="openStripePortal()" style="display:none;background:var(--brand-primary-soft);color:var(--text-high);border:1px solid var(--border-strong);margin-top:8px;">
+            <span class="material-symbols-rounded" style="font-size:18px;">manage_accounts</span>
+            Manage Subscription
+          </button>
 
           <div class="pro-secure-row">
             <div class="pro-secure-dot">✓</div>
@@ -1237,6 +1242,36 @@ If you have questions about these Terms, contact us at: eidanplaz@gmail.com</p>
 <script>
 const BACKEND_URL = "https://llama-backend-1-qq3f.onrender.com";
 
+// ————————————————————————————————
+// AUTH TOKEN — stored in localStorage, sent as Authorization header.
+// Cross-site cookies are blocked by most browsers when frontend and backend
+// are on different domains, so we use localStorage + Bearer token instead.
+// ————————————————————————————————
+const TOKEN_KEY = "rreplay_session_token";
+
+function getToken() { try { return localStorage.getItem(TOKEN_KEY); } catch(e) { return null; } }
+function setToken(t) { try { localStorage.setItem(TOKEN_KEY, t); } catch(e) {} }
+function clearToken() { try { localStorage.removeItem(TOKEN_KEY); } catch(e) {} }
+
+// On page load, if the URL has #token=... (set by the backend after OAuth),
+// grab it, store it, and clean the URL so it isn't visible/bookmarked.
+(function() {
+  const hash = window.location.hash;
+  if (hash.startsWith("#token=")) {
+    const token = hash.slice(7);
+    if (token) { setToken(token); }
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+})();
+
+// Drop-in fetch wrapper that always adds the Authorization header
+async function authFetch(url, options = {}) {
+  const token = getToken();
+  const headers = { ...(options.headers || {}) };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return fetch(url, { ...options, headers, credentials: "include" });
+}
+
 setInterval(() => {
   fetch(`${BACKEND_URL}/chat`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"ping",model:"gemini"})})
   .then(()=>console.log("Backend heartbeat sent")).catch(()=>{});
@@ -1309,7 +1344,7 @@ function setActivePage(page) {
   } else if (page === "about") { aboutPage.classList.add("active"); navAbout.classList.add("active");
   } else if (page === "multichatSetup") { multichatSetupPage.classList.add("active"); navMultiChat.classList.add("active"); setTimeout(updateLimitBanner, 0);
   } else if (page === "multichat") { multichatPage.classList.add("active"); navMultiChat.classList.add("active"); setTimeout(updateMcUsageHint, 0);
-  } else if (page === "pro") { proPage.classList.add("active"); navPro.classList.add("active"); }
+  } else if (page === "pro") { proPage.classList.add("active"); navPro.classList.add("active"); setTimeout(updateProPage, 0); }
 }
 
 // SIDEBAR NAV
@@ -1499,8 +1534,8 @@ async function sendMessage() {
     const parts=[]; if(text)parts.push({text});
     if(image)parts.push({inline_data:{mime_type:image.mimeType,data:image.dataUrl.split(",")[1]}});
     chatHistory.push({role:"user",parts});
-    const res=await fetch(`${BACKEND_URL}/chat`,{
-      method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",
+    const res=await authFetch(`${BACKEND_URL}/chat`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({message:text,image:image?{mimeType:image.mimeType,data:image.dataUrl.split(",")[1]}:null,history:chatHistory,model:currentModel,conversation_id:currentConversationId}),
       signal:abortController.signal
     });
@@ -1624,8 +1659,10 @@ function renderAccountBox() {
 
   document.getElementById("accountDropdownLogout").onclick = async () => {
     dropdown.style.display = "none";
-    await fetch(`${BACKEND_URL}/auth/logout`, { method: "POST", credentials: "include" });
+    await authFetch(`${BACKEND_URL}/auth/logout`, { method: "POST" });
+    clearToken();
     currentUser = null;
+    mcSendLog = [];
     historyList.innerHTML = "";
     historyHeading.style.display = "none";
     renderAccountBox();
@@ -1640,15 +1677,17 @@ function renderAccountBox() {
   }, { once: false });
 }
 async function checkAuth() {
-  try{const res=await fetch(`${BACKEND_URL}/auth/me`,{credentials:"include"});const data=await res.json();currentUser=data.user||null;}catch(e){currentUser=null;}
+  try{const res=await authFetch(`${BACKEND_URL}/auth/me`);const data=await res.json();currentUser=data.user||null;}catch(e){currentUser=null;}
+  mcSendLog = mcLoadLog();
   renderAccountBox();
   updateLimitBanner();
+  updateProPage();
   if(currentUser)refreshHistoryList();
 }
 async function refreshHistoryList() {
   if(!currentUser)return;
   try{
-    const res=await fetch(`${BACKEND_URL}/conversations`,{credentials:"include"});if(!res.ok)return;
+    const res=await authFetch(`${BACKEND_URL}/conversations`);if(!res.ok)return;
     const convos=await res.json();
     historyHeading.style.display=convos.length?"block":"none";
     historyList.innerHTML="";
@@ -1693,7 +1732,7 @@ async function refreshHistoryList() {
         document.getElementById(`deleteBtn_${c.id}`).onclick=async(ev)=>{
           ev.stopPropagation();
           try{
-            await fetch(`${BACKEND_URL}/conversations/${c.id}`,{method:"DELETE",credentials:"include"});
+            await authFetch(`${BACKEND_URL}/conversations/${c.id}`,{method:"DELETE"});
             if(currentConversationId===c.id){
               chatContainer.innerHTML="";
               chatHistory=[];
@@ -1720,7 +1759,7 @@ async function refreshHistoryList() {
 }
 async function loadConversation(id) {
   try{
-    const res=await fetch(`${BACKEND_URL}/conversations/${id}`,{credentials:"include"});if(!res.ok)return;
+    const res=await authFetch(`${BACKEND_URL}/conversations/${id}`);if(!res.ok)return;
     const data=await res.json();
     hideWelcomeMessage(); chatContainer.innerHTML=""; chatHistory=[]; currentConversationId=data.id;
     data.messages.forEach(m=>{
@@ -1756,12 +1795,15 @@ let multichatColumnsState=[], mcPendingImage=null;
 // Free tier: 10 multi-chat sends per 5 hours (stored in memory per session)
 const MC_FREE_LIMIT = 10;
 const MC_WINDOW_MS = 5 * 60 * 60 * 1000; // 5 hours
-const MC_STORAGE_KEY = "rreplay_mc_sends";
 
-// Load persisted send timestamps from localStorage, pruning expired ones immediately
+function mcStorageKey() {
+  // Per-user key so different accounts on the same device don't share limits
+  return currentUser ? `rreplay_mc_sends_${currentUser.id}` : "rreplay_mc_sends_guest";
+}
+
 function mcLoadLog() {
   try {
-    const raw = localStorage.getItem(MC_STORAGE_KEY);
+    const raw = localStorage.getItem(mcStorageKey());
     const parsed = raw ? JSON.parse(raw) : [];
     const now = Date.now();
     return parsed.filter(t => now - t < MC_WINDOW_MS);
@@ -1769,10 +1811,10 @@ function mcLoadLog() {
 }
 
 function mcSaveLog(log) {
-  try { localStorage.setItem(MC_STORAGE_KEY, JSON.stringify(log)); } catch (e) {}
+  try { localStorage.setItem(mcStorageKey(), JSON.stringify(log)); } catch (e) {}
 }
 
-let mcSendLog = mcLoadLog();
+let mcSendLog = [];  // loaded after auth check completes (see checkAuth)
 
 function mcFreeUsesLeft() {
   const now = Date.now();
@@ -1858,7 +1900,7 @@ async function sendToColumn(col,text,image) {
   const thinkingMsg=mcAddThinkingMessage(col.messagesEl);
   const timer=setTimeout(()=>mcSwitchToCodestarting(thinkingMsg),CODESTART_THRESHOLD_MS);
   try{
-    const res=await fetch(`${BACKEND_URL}/chat`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",
+    const res=await authFetch(`${BACKEND_URL}/chat`,{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({message:text,image:image?{mimeType:image.mimeType,data:image.dataUrl.split(",")[1]}:null,history:col.history,model:col.model,conversation_id:null,persist:false})});
     const data=await res.json(); clearTimeout(timer);
     if(data.reply){col.history.push({role:"model",parts:[{text:data.reply}]});mcReplaceThinkingWithReply(thinkingMsg,data.reply,col.messagesEl);}
@@ -1900,6 +1942,73 @@ function updateMcUsageHint() {
   hint.innerHTML = left <= 3
     ? `${left} free Multi-Chat message${left!==1?"s":""} remaining this window. <span style="cursor:pointer;text-decoration:underline;" onclick="setActivePage('pro')">Upgrade to Pro</span> for unlimited.`
     : `${left} of ${MC_FREE_LIMIT} free Multi-Chat messages remaining (resets every 5 hours).`;
+}
+
+// ————————————————————————————————
+// STRIPE
+// ————————————————————————————————
+function updateProPage() {
+  const checkoutBtn = document.getElementById("stripeCheckoutBtn");
+  const portalBtn = document.getElementById("stripePortalBtn");
+  if (!checkoutBtn || !portalBtn) return;
+  if (currentUser && currentUser.is_pro) {
+    checkoutBtn.style.display = "none";
+    portalBtn.style.display = "flex";
+  } else {
+    checkoutBtn.style.display = "flex";
+    portalBtn.style.display = "none";
+  }
+  // Handle ?subscribed=1 or ?canceled=1 query params from Stripe redirect
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("subscribed") === "1") {
+    history.replaceState(null, "", window.location.pathname);
+    // Re-check auth so the plan badge updates immediately
+    checkAuth();
+  }
+}
+
+async function startStripeCheckout() {
+  if (!currentUser) { showSigninPopup(); return; }
+  const btn = document.getElementById("stripeCheckoutBtn");
+  const label = document.getElementById("stripeCheckoutLabel");
+  label.textContent = "Redirecting…";
+  btn.style.opacity = "0.7";
+  btn.style.pointerEvents = "none";
+  try {
+    const res = await authFetch(`${BACKEND_URL}/stripe/create-checkout`, { method: "POST" });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      label.textContent = data.error || "Something went wrong. Try again.";
+      btn.style.opacity = "1";
+      btn.style.pointerEvents = "auto";
+    }
+  } catch (e) {
+    label.textContent = "Start free trial with Stripe";
+    btn.style.opacity = "1";
+    btn.style.pointerEvents = "auto";
+  }
+}
+
+async function openStripePortal() {
+  if (!currentUser) return;
+  const btn = document.getElementById("stripePortalBtn");
+  btn.style.opacity = "0.7";
+  btn.style.pointerEvents = "none";
+  try {
+    const res = await authFetch(`${BACKEND_URL}/stripe/portal`, { method: "POST" });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      btn.style.opacity = "1";
+      btn.style.pointerEvents = "auto";
+    }
+  } catch (e) {
+    btn.style.opacity = "1";
+    btn.style.pointerEvents = "auto";
+  }
 }
 </script>
 </body>
