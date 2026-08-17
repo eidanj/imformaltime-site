@@ -75,10 +75,9 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
   backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   border-right:1px solid var(--border-subtle);
   display:flex; flex-direction:column; transition:width 0.25s ease;
-  overflow:hidden;
 }
 #sidebar.collapsed { width:72px; }
-.sidebar-header { height:64px; display:flex; align-items:center; padding:0 16px; }
+.sidebar-header { height:64px; display:flex; align-items:center; padding:0 16px; overflow:hidden; }
 .menu-toggle { font-size:28px; cursor:pointer; padding:8px; border-radius:50%; transition:0.2s; color:var(--text-high); }
 .menu-toggle:hover { background:var(--brand-primary-soft); }
 .nav-top {
@@ -98,6 +97,7 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
   gap: 6px;
   flex-shrink: 0;
   border-top: 1px solid var(--border-subtle);
+  overflow: visible;
 }
 
 #historyList {
@@ -191,12 +191,7 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
   background: rgba(248, 113, 113, 0.1);
 }
 
-.account-box { padding:0 12px 8px; }
-.account-signed-in { display:flex; align-items:center; gap:10px; padding:6px 4px; }
-.account-avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--border-strong); }
-.account-name { flex:1; min-width:0; font-size:0.85rem; font-weight:600; color:var(--text-high); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.account-logout-btn { font-size:20px; color:var(--text-low); cursor:pointer; padding:4px; border-radius:50%; transition:0.2s; }
-.account-logout-btn:hover { background:var(--brand-primary-soft); color:var(--text-high); }
+.account-box { padding:0 12px 8px; position: relative; }
 
 .nav-link {
   height:48px; display:flex; align-items:center; gap:14px; padding:0 16px;
@@ -453,6 +448,11 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
 ——————————————— */
 .account-signed-in {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  cursor: pointer;
 }
 
 .account-dropdown {
@@ -1707,7 +1707,23 @@ let multichatColumnsState=[], mcPendingImage=null;
 // Free tier: 10 multi-chat sends per 5 hours (stored in memory per session)
 const MC_FREE_LIMIT = 10;
 const MC_WINDOW_MS = 5 * 60 * 60 * 1000; // 5 hours
-let mcSendLog = []; // timestamps of sends in this session
+const MC_STORAGE_KEY = "rreplay_mc_sends";
+
+// Load persisted send timestamps from localStorage, pruning expired ones immediately
+function mcLoadLog() {
+  try {
+    const raw = localStorage.getItem(MC_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    const now = Date.now();
+    return parsed.filter(t => now - t < MC_WINDOW_MS);
+  } catch (e) { return []; }
+}
+
+function mcSaveLog(log) {
+  try { localStorage.setItem(MC_STORAGE_KEY, JSON.stringify(log)); } catch (e) {}
+}
+
+let mcSendLog = mcLoadLog();
 
 function mcFreeUsesLeft() {
   const now = Date.now();
@@ -1717,6 +1733,7 @@ function mcFreeUsesLeft() {
 
 function mcRecordSend() {
   mcSendLog.push(Date.now());
+  mcSaveLog(mcSendLog);
 }
 
 function renderModelPickers(count) {
