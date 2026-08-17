@@ -75,25 +75,121 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
   backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   border-right:1px solid var(--border-subtle);
   display:flex; flex-direction:column; transition:width 0.25s ease;
+  overflow:hidden;
 }
 #sidebar.collapsed { width:72px; }
 .sidebar-header { height:64px; display:flex; align-items:center; padding:0 16px; }
 .menu-toggle { font-size:28px; cursor:pointer; padding:8px; border-radius:50%; transition:0.2s; color:var(--text-high); }
 .menu-toggle:hover { background:var(--brand-primary-soft); }
-.nav-top,.nav-bottom { padding:12px; display:flex; flex-direction:column; gap:6px; }
-.nav-bottom { margin-top:auto; }
+.nav-top {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.nav-bottom {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+#historyList {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
+}
 
 .history-heading {
   margin:18px 16px 6px; font-size:0.72rem; font-weight:700;
   letter-spacing:0.06em; text-transform:uppercase; color:var(--text-low); display:none;
 }
 .history-item {
-  display:flex; align-items:center; gap:10px; height:42px; padding:0 16px;
-  border-radius:var(--radius-pill); cursor:pointer; color:var(--text-med);
-  font-size:0.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:0.2s;
+  position: relative;
+  display: flex; align-items: center; height: 42px; padding: 0 8px 0 16px;
+  border-radius: var(--radius-pill); cursor: pointer; color: var(--text-med);
+  font-size: 0.88rem; transition: 0.2s;
 }
-.history-item:hover { background:var(--brand-primary-soft); color:var(--text-high); }
-.history-item.active { background:var(--brand-primary-soft); color:var(--text-high); font-weight:600; }
+.history-item:hover { background: var(--brand-primary-soft); color: var(--text-high); }
+.history-item.active { background: var(--brand-primary-soft); color: var(--text-high); font-weight: 600; }
+
+.history-item-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-item-menu-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-low);
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.history-item:hover .history-item-menu-btn {
+  opacity: 1;
+}
+
+.history-item-menu-btn:hover {
+  background: var(--border-subtle);
+  color: var(--text-high);
+}
+
+.history-item-dropdown {
+  position: absolute;
+  right: 8px;
+  top: calc(100% + 2px);
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 50;
+  overflow: hidden;
+  min-width: 160px;
+}
+
+.history-item-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: "Google Sans", sans-serif;
+  font-size: 0.85rem;
+  color: #f87171;
+  cursor: pointer;
+  transition: 0.15s;
+  text-align: left;
+}
+
+.history-item-dropdown-btn .material-symbols-rounded {
+  font-size: 16px;
+}
+
+.history-item-dropdown-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+}
 
 .account-box { padding:0 12px 8px; }
 .account-signed-in { display:flex; align-items:center; gap:10px; padding:6px 4px; }
@@ -1505,11 +1601,70 @@ async function refreshHistoryList() {
   try{
     const res=await fetch(`${BACKEND_URL}/conversations`,{credentials:"include"});if(!res.ok)return;
     const convos=await res.json();
-    historyHeading.style.display=convos.length?"block":"none"; historyList.innerHTML="";
+    historyHeading.style.display=convos.length?"block":"none";
+    historyList.innerHTML="";
+
     convos.forEach(c=>{
       const item=document.createElement("div");
       item.className="history-item"+(c.id===currentConversationId?" active":"");
-      item.textContent=c.title||"New Chat"; item.onclick=()=>loadConversation(c.id);
+
+      const label=document.createElement("span");
+      label.className="history-item-label";
+      label.textContent=c.title||"New Chat";
+
+      const menuBtn=document.createElement("span");
+      menuBtn.className="history-item-menu-btn material-symbols-rounded";
+      menuBtn.textContent="more_vert";
+      menuBtn.title="Options";
+
+      item.appendChild(label);
+      item.appendChild(menuBtn);
+
+      // Load conversation on clicking the label area
+      label.onclick=()=>loadConversation(c.id);
+      item.onclick=(e)=>{
+        if(!e.target.closest(".history-item-menu-btn")&&!e.target.closest(".history-item-dropdown"))
+          loadConversation(c.id);
+      };
+
+      // 3-dot dropdown
+      menuBtn.onclick=(e)=>{
+        e.stopPropagation();
+        // Close any other open dropdowns
+        document.querySelectorAll(".history-item-dropdown").forEach(d=>d.remove());
+
+        const dropdown=document.createElement("div");
+        dropdown.className="history-item-dropdown";
+        dropdown.innerHTML=`
+          <button class="history-item-dropdown-btn" id="deleteBtn_${c.id}">
+            <span class="material-symbols-rounded">delete</span>Delete Conversation
+          </button>`;
+        item.appendChild(dropdown);
+
+        document.getElementById(`deleteBtn_${c.id}`).onclick=async(ev)=>{
+          ev.stopPropagation();
+          try{
+            await fetch(`${BACKEND_URL}/conversations/${c.id}`,{method:"DELETE",credentials:"include"});
+            if(currentConversationId===c.id){
+              chatContainer.innerHTML="";
+              chatHistory=[];
+              currentConversationId=null;
+              showWelcomeMessage();
+            }
+          }catch(e){}
+          await refreshHistoryList();
+        };
+
+        // Close when clicking anywhere else
+        const close=(ev)=>{
+          if(!dropdown.contains(ev.target)&&ev.target!==menuBtn){
+            dropdown.remove();
+            document.removeEventListener("click",close);
+          }
+        };
+        setTimeout(()=>document.addEventListener("click",close),0);
+      };
+
       historyList.appendChild(item);
     });
   }catch(e){}
