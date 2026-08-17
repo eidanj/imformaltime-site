@@ -9,9 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
 
   <style>
-/* ————————————————
-   GLOBAL VARIABLES — black & white theme
-——————————————— */
 :root {
   --bg-page: #000000;
   --bg-sidebar: rgba(10, 10, 10, 0.55);
@@ -29,9 +26,6 @@
   --input-max-w: 760px;
   --code-bg: rgba(255, 255, 255, 0.08);
 }
-
-/* Light theme: page + chrome flips to white with black text/icons.
-   The matrix-ocean canvas itself is untouched — see #matrixCanvas rules. */
 html[data-theme="light"] {
   --bg-page: #ffffff;
   --bg-sidebar: rgba(255, 255, 255, 0.65);
@@ -46,1079 +40,312 @@ html[data-theme="light"] {
   --border-strong: rgba(0, 0, 0, 0.28);
   --code-bg: rgba(0, 0, 0, 0.06);
 }
-
-html[data-theme="light"] .header-bar { background: rgba(255, 255, 255, 0.55); }
-html[data-theme="light"] .composer { background: rgba(255, 255, 255, 0.65); }
-html[data-theme="light"] .model-dropdown-menu { background: rgba(255, 255, 255, 0.92); }
-html[data-theme="light"] .model-dropdown-toggle { background: rgba(0, 0, 0, 0.03); }
-html[data-theme="light"] .user-bubble { background: rgba(0, 0, 0, 0.05); }
-html[data-theme="light"] .thinking-bar { background: rgba(0, 0, 0, 0.08); }
-html[data-theme="light"] .input-region { background: linear-gradient(to top, rgba(255,255,255,0.75) 60%, transparent); }
+html[data-theme="light"] .header-bar { background: rgba(255,255,255,0.55); }
+html[data-theme="light"] .composer { background: rgba(255,255,255,0.65); }
+html[data-theme="light"] .model-dropdown-menu { background: rgba(255,255,255,0.92); }
+html[data-theme="light"] .model-dropdown-toggle { background: rgba(0,0,0,0.03); }
+html[data-theme="light"] .user-bubble { background: rgba(0,0,0,0.05); }
+html[data-theme="light"] .input-region { background: linear-gradient(to top,rgba(255,255,255,0.75) 60%,transparent); }
 html[data-theme="light"] #stopBtn { background: #1a1a1a; color: #fff; }
 html[data-theme="light"] #sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.08); }
+html[data-theme="light"] .multichat-column-header { color: var(--text-med); }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Google Sans", sans-serif;
-}
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Google Sans",sans-serif; }
+html,body { height:100%; }
+body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); color:var(--text-high); }
 
-html, body {
-  height: 100%;
-}
-
-body {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--bg-page);
-  color: var(--text-high);
-}
-
-/* ————————————————
-   MATRIX-OCEAN BACKGROUND CANVAS
-——————————————— */
 #matrixCanvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  background: #000;
-  pointer-events: none;
-  filter: blur(3px);
-  transition: filter 0.2s ease;
+  position:fixed; inset:0; width:100%; height:100%;
+  z-index:0; background:#000; pointer-events:none;
+  filter:blur(3px); transition:filter 0.2s ease;
 }
+#sidebar,.viewport { position:relative; z-index:1; }
 
-/* Everything else sits above the canvas */
-#sidebar,
-.viewport {
-  position: relative;
-  z-index: 1;
-}
-
-/* ————————————————
-   SIDEBAR
-——————————————— */
+/* SIDEBAR */
 #sidebar {
-  width: 260px;
-  background: var(--bg-sidebar);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-right: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  transition: width 0.25s ease;
+  width:260px; background:var(--bg-sidebar);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-right:1px solid var(--border-subtle);
+  display:flex; flex-direction:column; transition:width 0.25s ease;
 }
+#sidebar.collapsed { width:72px; }
+.sidebar-header { height:64px; display:flex; align-items:center; padding:0 16px; }
+.menu-toggle { font-size:28px; cursor:pointer; padding:8px; border-radius:50%; transition:0.2s; color:var(--text-high); }
+.menu-toggle:hover { background:var(--brand-primary-soft); }
+.nav-top,.nav-bottom { padding:12px; display:flex; flex-direction:column; gap:6px; }
+.nav-bottom { margin-top:auto; }
 
-#sidebar.collapsed {
-  width: 72px;
-}
-
-.sidebar-header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-}
-
-.menu-toggle {
-  font-size: 28px;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: 0.2s;
-  color: var(--text-high);
-}
-
-.menu-toggle:hover {
-  background: var(--brand-primary-soft);
-}
-
-.nav-top,
-.nav-bottom {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.nav-bottom {
-  margin-top: auto;
-}
-
-/* ————————————————
-   CHAT HISTORY LIST
-——————————————— */
 .history-heading {
-  margin: 18px 16px 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-low);
-  display: none; /* shown by JS once the user is signed in and has history */
+  margin:18px 16px 6px; font-size:0.72rem; font-weight:700;
+  letter-spacing:0.06em; text-transform:uppercase; color:var(--text-low); display:none;
 }
-
 .history-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 42px;
-  padding: 0 16px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  color: var(--text-med);
-  font-size: 0.88rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: 0.2s;
+  display:flex; align-items:center; gap:10px; height:42px; padding:0 16px;
+  border-radius:var(--radius-pill); cursor:pointer; color:var(--text-med);
+  font-size:0.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:0.2s;
 }
+.history-item:hover { background:var(--brand-primary-soft); color:var(--text-high); }
+.history-item.active { background:var(--brand-primary-soft); color:var(--text-high); font-weight:600; }
 
-.history-item:hover {
-  background: var(--brand-primary-soft);
-  color: var(--text-high);
-}
-
-.history-item.active {
-  background: var(--brand-primary-soft);
-  color: var(--text-high);
-  font-weight: 600;
-}
-
-/* ————————————————
-   ACCOUNT / LOGIN BOX
-——————————————— */
-.account-box {
-  padding: 0 12px 8px;
-}
-
-.google-signin-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  height: 42px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-strong);
-  background: transparent;
-  color: var(--text-high);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  text-decoration: none;
-}
-
-.google-signin-btn:hover {
-  background: var(--brand-primary-soft);
-}
-
-.account-signed-in {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 4px;
-}
-
-.account-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: var(--border-strong);
-}
-
-.account-name {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-high);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.account-logout-btn {
-  font-size: 20px;
-  color: var(--text-low);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  transition: 0.2s;
-}
-
-.account-logout-btn:hover {
-  background: var(--brand-primary-soft);
-  color: var(--text-high);
-}
+.account-box { padding:0 12px 8px; }
+.account-signed-in { display:flex; align-items:center; gap:10px; padding:6px 4px; }
+.account-avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--border-strong); }
+.account-name { flex:1; min-width:0; font-size:0.85rem; font-weight:600; color:var(--text-high); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.account-logout-btn { font-size:20px; color:var(--text-low); cursor:pointer; padding:4px; border-radius:50%; transition:0.2s; }
+.account-logout-btn:hover { background:var(--brand-primary-soft); color:var(--text-high); }
 
 .nav-link {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 0 16px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  color: var(--text-med);
-  transition: 0.2s;
-  white-space: nowrap;
-  overflow: hidden;
+  height:48px; display:flex; align-items:center; gap:14px; padding:0 16px;
+  border-radius:var(--radius-pill); cursor:pointer; color:var(--text-med);
+  transition:0.2s; white-space:nowrap; overflow:hidden;
 }
+.nav-link:hover { background:var(--brand-primary-soft); color:var(--text-high); }
+.nav-link.active { background:var(--brand-primary-soft); color:var(--text-high); font-weight:600; }
 
-.nav-link:hover {
-  background: var(--brand-primary-soft);
-  color: var(--text-high);
-}
+.logo-text { font-size:1.6rem; font-weight:700; color:var(--text-high); position:relative; display:inline-block; padding-right:40px; letter-spacing:0.01em; }
+.beta-tag { position:absolute; top:-2px; right:0; font-size:0.65rem; font-weight:800; color:#9a9a9a; letter-spacing:0.08em; text-transform:uppercase; }
+.nav-text { transition:opacity 0.2s ease; }
+#sidebar.collapsed .nav-text { opacity:0; pointer-events:none; }
 
-.nav-link.active {
-  background: var(--brand-primary-soft);
-  color: var(--text-high);
-  font-weight: 600;
-}
-
-/* LOGO */
-.logo-text {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--text-high);
-  position: relative;
-  display: inline-block;
-  padding-right: 40px;
-  letter-spacing: 0.01em;
-}
-
-.beta-tag {
-  position: absolute;
-  top: -2px;
-  right: 0;
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #9a9a9a;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.nav-text {
-  transition: opacity 0.2s ease;
-}
-
-#sidebar.collapsed .nav-text {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ————————————————
-   MAIN VIEWPORT
-——————————————— */
-.viewport {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* HEADER */
+/* VIEWPORT + HEADER */
+.viewport { flex:1; display:flex; flex-direction:column; }
 .header-bar {
-  height: 64px;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  gap: 12px;
+  height:64px; background:rgba(0,0,0,0.45); backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--border-subtle);
+  display:flex; align-items:center; justify-content:space-between; padding:0 32px; gap:12px;
 }
-
-.mobile-menu-btn {
-  display: none;
-  font-size: 26px;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 50%;
-  color: var(--text-high);
-  transition: 0.2s;
-}
-
-.mobile-menu-btn:hover {
-  background: var(--brand-primary-soft);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
+.mobile-menu-btn { display:none; font-size:26px; cursor:pointer; padding:6px; border-radius:50%; color:var(--text-high); transition:0.2s; }
+.mobile-menu-btn:hover { background:var(--brand-primary-soft); }
+.header-left { display:flex; align-items:center; gap:12px; }
+.header-right { display:flex; align-items:center; gap:18px; }
 .header-signin-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-strong);
-  background: transparent;
-  color: var(--text-high);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: 0.2s;
+  display:flex; align-items:center; gap:6px; height:34px; padding:0 14px;
+  border-radius:var(--radius-pill); border:1px solid var(--border-strong);
+  background:transparent; color:var(--text-high); font-size:0.82rem; font-weight:600;
+  cursor:pointer; text-decoration:none; transition:0.2s;
 }
+.header-signin-btn:hover { background:var(--brand-primary-soft); }
 
-.header-signin-btn:hover {
-  background: var(--brand-primary-soft);
-}
+/* BACKGROUND TOGGLE */
+.bg-toggle { display:flex; align-items:center; gap:10px; cursor:pointer; color:var(--text-med); font-size:0.85rem; user-select:none; }
+.toggle-switch { position:relative; display:inline-block; width:40px; height:22px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:var(--border-strong); border-radius:34px; transition:0.2s; }
+.toggle-slider::before { content:""; position:absolute; height:16px; width:16px; left:3px; bottom:3px; background:#ffffff; border-radius:50%; transition:0.2s; }
+.toggle-switch input:checked + .toggle-slider { background:var(--brand-primary); }
+.toggle-switch input:checked + .toggle-slider::before { transform:translateX(18px); background:var(--on-brand); }
 
-/* ————————————————
-   BACKGROUND TOGGLE
-——————————————— */
-.bg-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  color: var(--text-med);
-  font-size: 0.85rem;
-  user-select: none;
-}
+/* PAGE SYSTEM */
+.page { flex:1; display:none; overflow-y:auto; height:calc(100vh - 64px); padding:32px; }
+.page.active { display:block; }
 
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 22px;
-  flex-shrink: 0;
-}
+/* CONVERSATION PAGE */
+#conversationPage { display:flex; flex-direction:column; height:calc(100vh - 64px); }
+#chat-scroller { flex:1; display:flex; justify-content:center; overflow-y:auto; padding:32px 0 24px; }
+#chat-container { width:100%; max-width:var(--input-max-w); padding:0 24px; }
+.message { margin-bottom:28px; }
 
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  inset: 0;
-  background: var(--border-strong);
-  border-radius: 34px;
-  transition: 0.2s;
-}
-
-.toggle-slider::before {
-  content: "";
-  position: absolute;
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background: #ffffff;
-  border-radius: 50%;
-  transition: 0.2s;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background: var(--brand-primary);
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(18px);
-  background: var(--on-brand);
-}
-
-/* ————————————————
-   PAGE SYSTEM
-——————————————— */
-.page {
-  flex: 1;
-  display: none;
-  overflow-y: auto;
-  height: calc(100vh - 64px);
-  padding: 32px;
-}
-
-.page.active {
-  display: block;
-}
-
-/* ————————————————
-   CONVERSATION PAGE
-——————————————— */
-#conversationPage {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 64px);
-}
-
-#chat-scroller {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  overflow-y: auto;
-  padding: 32px 0 24px;
-}
-
-#chat-container {
-  width: 100%;
-  max-width: var(--input-max-w);
-  padding: 0 24px;
-}
-
-.message {
-  margin-bottom: 28px;
-}
-
-/* ————————————————
-   WELCOME MESSAGE (empty-chat state)
-——————————————— */
 .welcome-message {
-  height: 100%;
-  min-height: 240px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 24px;
-  font-size: 1.9rem;
-  font-weight: 600;
-  color: var(--text-med);
-  letter-spacing: -0.01em;
-  animation: welcomeFadeIn 0.5s ease;
+  height:100%; min-height:240px; display:flex; align-items:center; justify-content:center;
+  text-align:center; padding:0 24px; font-size:1.9rem; font-weight:600;
+  color:var(--text-med); letter-spacing:-0.01em; animation:welcomeFadeIn 0.5s ease;
 }
+@keyframes welcomeFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-@keyframes welcomeFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ————————————————
-   DISCLAIMER
-——————————————— */
-.disclaimer {
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--text-low);
-  margin-top: 10px;
-}
+.disclaimer { text-align:center; font-size:0.75rem; color:var(--text-low); margin-top:10px; }
 
 .user-bubble {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(8px);
-  padding: 12px 20px;
-  border-radius: 18px 18px 4px 18px;
-  border: 1px solid var(--border-subtle);
-  color: var(--text-high);
-  max-width: 80%;
-  margin-left: auto;
+  background:rgba(255,255,255,0.06); backdrop-filter:blur(8px);
+  padding:12px 20px; border-radius:18px 18px 4px 18px;
+  border:1px solid var(--border-subtle); color:var(--text-high);
+  max-width:80%; margin-left:auto;
 }
+.ai-bubble { padding:12px 0; color:var(--text-high); line-height:1.6; }
+.ai-bubble strong,.user-bubble strong { font-weight:700; color:var(--text-high); }
+.ai-bubble em,.user-bubble em { font-style:italic; }
+.ai-bubble code,.user-bubble code { background:var(--code-bg); padding:2px 6px; border-radius:4px; font-family:"JetBrains Mono",monospace; font-size:0.9em; }
 
-.ai-bubble {
-  padding: 12px 0;
-  color: var(--text-high);
-  line-height: 1.6;
-}
+.fade-word { display:inline-block; opacity:0; animation:fadeWordIn 0.45s ease forwards; }
+@keyframes fadeWordIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 
-.ai-bubble strong,
-.user-bubble strong {
-  font-weight: 700;
-  color: var(--text-high);
-}
-
-.ai-bubble em,
-.user-bubble em {
-  font-style: italic;
-}
-
-.ai-bubble code,
-.user-bubble code {
-  background: var(--code-bg);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 0.9em;
-}
-
-/* Word-by-word fade-in reveal, used for freshly generated replies */
-.fade-word {
+/* DOT LOADER — used for both thinking and codestarting states */
+.dot-loader {
   display: inline-block;
-  opacity: 0;
-  animation: fadeWordIn 0.45s ease forwards;
-}
-
-@keyframes fadeWordIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ————————————————
-   CODESTARTING CUBE
-——————————————— */
-.codestarting-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.codestart-cube {
-  width: 18px;
-  height: 18px;
+  width: 50px;
+  height: 50px;
   position: relative;
-  transform-style: preserve-3d;
-  animation: cubeSpin 1.6s infinite steps(4);
+  padding: 12px 0;
 }
-
-.cube-face {
+.dot-loader .dot {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
   background: var(--text-high);
-  border-radius: 4px;
+  left: 50%;
+  top: 50%;
+  will-change: transform;
 }
 
-@keyframes cubeSpin {
-  0%   { transform: rotateY(0deg); }
-  25%  { transform: rotateY(90deg); }
-  50%  { transform: rotateY(180deg); }
-  75%  { transform: rotateY(270deg); }
-  100% { transform: rotateY(360deg); }
-}
 
-.codestart-text {
-  font-size: 0.9rem;
-  color: var(--text-med);
-  letter-spacing: 0.04em;
-}
-
-/* ————————————————
-   NORMAL LOADING BAR
-——————————————— */
-.thinking-bar {
-  width: 120px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.10);
-  border-radius: 50px;
-  overflow: hidden;
-  position: relative;
-}
-
-.bar-fill {
-  width: 40px;
-  height: 100%;
-  background: linear-gradient(90deg,
-    #4d4d4d,
-    #d9d9d9,
-    #ffffff
-  );
-  border-radius: 50px;
-  position: absolute;
-  left: -40px;
-  animation: windowsLoad 1.4s infinite ease-in-out;
-}
-
-@keyframes windowsLoad {
-  0%   { left: -40px; width: 40px; }
-  40%  { left: 40px;  width: 60px; }
-  70%  { left: 90px;  width: 40px; }
-  100% { left: 140px; width: 40px; }
-}
-
-/* ————————————————
-   INPUT REGION
-——————————————— */
+/* INPUT REGION — shared by conversation AND multi-chat */
 .input-region {
-  padding: 24px;
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 60%, transparent);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding:24px; background:linear-gradient(to top,rgba(0,0,0,0.6) 60%,transparent);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
 }
-
 .composer {
-  width: 100%;
-  max-width: var(--input-max-w);
-  background: rgba(15, 15, 15, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 28px;
-  padding: 12px 16px;
-  border: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  width:100%; max-width:var(--input-max-w);
+  background:rgba(15,15,15,0.65); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-radius:28px; padding:12px 16px; border:1px solid var(--border-subtle);
+  display:flex; flex-direction:column; gap:12px;
 }
+#userInput,#mcUserInput {
+  width:100%; min-height:44px; border:none; outline:none; resize:none;
+  font-size:1.1rem; padding:8px 12px; background:transparent;
+  color:var(--text-high); font-family:"Google Sans",sans-serif;
+}
+#userInput::placeholder,#mcUserInput::placeholder { color:var(--text-low); }
+.composer-toolbar { display:flex; justify-content:space-between; align-items:center; }
+.toolbar-left { display:flex; align-items:center; gap:8px; }
 
-#userInput {
-  width: 100%;
-  min-height: 44px;
-  border: none;
-  outline: none;
-  resize: none;
-  font-size: 1.1rem;
-  padding: 8px 12px;
-  background: transparent;
-  color: var(--text-high);
-}
+.btn-action-plus { width:36px; height:36px; border-radius:50%; border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:0.2s; color:var(--text-high); }
+.btn-action-plus:hover { color:var(--on-brand); background:var(--brand-primary); border-color:var(--brand-primary); }
 
-#userInput::placeholder {
-  color: var(--text-low);
-}
+.model-dropdown { position:relative; min-width:200px; }
+.model-dropdown-toggle { padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border-strong); background:rgba(255,255,255,0.03); display:flex; align-items:center; justify-content:space-between; cursor:pointer; gap:8px; color:var(--text-high); }
+.model-dropdown .label { font-size:0.9rem; color:var(--text-med); }
+.model-dropdown-menu { position:absolute; left:0; right:0; bottom:calc(100% + 4px); background:rgba(10,10,10,0.9); backdrop-filter:blur(14px); border-radius:var(--radius-md); border:1px solid var(--border-subtle); box-shadow:0 8px 24px rgba(0,0,0,0.5); z-index:10; display:none; max-height:260px; overflow-y:auto; }
+.model-dropdown-menu.open { display:block; }
+.model-option { padding:10px 12px; cursor:pointer; color:var(--text-high); }
+.model-option:hover { background:var(--brand-primary-soft); }
+.model-option.active { background:var(--brand-primary-soft); font-weight:600; }
+.model-option .sublabel { font-size:0.65rem; color:var(--text-low); margin-top:2px; }
 
-.composer-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* SEND + STOP — #mcSendBtn shares the same style as #sendBtn */
+#sendBtn,#stopBtn,#mcSendBtn {
+  width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+  transition:0.2s; display:inline-flex; align-items:center; justify-content:center;
 }
+#sendBtn,#mcSendBtn { background:var(--brand-primary); color:var(--on-brand); }
+#stopBtn { background:#e5e5e5; color:#000; display:none; }
+#sendBtn:hover,#stopBtn:hover,#mcSendBtn:hover { transform:scale(1.08); }
 
-.toolbar-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* PLUS BUTTON */
-.btn-action-plus {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.2s;
-  color: var(--text-high);
-}
-
-.btn-action-plus:hover {
-  color: var(--on-brand);
-  background: var(--brand-primary);
-  border-color: var(--brand-primary);
-}
-
-/* MODEL DROPDOWN */
-.model-dropdown {
-  position: relative;
-  min-width: 200px;
-}
-
-.model-dropdown-toggle {
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-strong);
-  background: rgba(255, 255, 255, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  gap: 8px;
-  color: var(--text-high);
-}
-
-.model-dropdown .label {
-  font-size: 0.9rem;
-  color: var(--text-med);
-}
-
-.model-dropdown-menu {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(100% + 4px);
-  background: rgba(10, 10, 10, 0.9);
-  backdrop-filter: blur(14px);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  z-index: 10;
-  display: none;
-  max-height: 260px;
-  overflow-y: auto;
-}
-
-.model-dropdown-menu.open {
-  display: block;
-}
-
-.model-option {
-  padding: 10px 12px;
-  cursor: pointer;
-  color: var(--text-high);
-}
-
-.model-option:hover {
-  background: var(--brand-primary-soft);
-}
-
-.model-option.active {
-  background: var(--brand-primary-soft);
-  font-weight: 600;
-}
-
-.model-option .sublabel {
-  font-size: 0.65rem;
-  color: var(--text-low);
-  margin-top: 2px;
-}
-
-/* SEND + STOP BUTTONS */
-#sendBtn,
-#stopBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#sendBtn {
-  background: var(--brand-primary);
-  color: var(--on-brand);
-}
-
-#stopBtn {
-  background: #e5e5e5;
-  color: #000;
-  display: none;
-}
-
-#sendBtn:hover,
-#stopBtn:hover {
-  transform: scale(1.08);
-}
-
-/* ————————————————
-   IMAGE ATTACHMENT PREVIEW
-——————————————— */
-.image-preview-row {
-  display: none;
-  padding: 4px 4px 0;
-}
-
-.image-chip {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
-}
-
-.image-chip img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.image-chip .remove-chip {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
-  font-size: 14px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.65);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-/* Thumbnail shown inside a sent user message */
-.user-bubble img.attached-image {
-  display: block;
-  max-width: 220px;
-  max-height: 220px;
-  border-radius: 12px;
-  margin-bottom: 8px;
-  object-fit: cover;
-}
+/* IMAGE ATTACHMENT */
+.image-preview-row { display:none; padding:4px 4px 0; }
+.image-chip { position:relative; width:64px; height:64px; border-radius:10px; overflow:hidden; border:1px solid var(--border-subtle); }
+.image-chip img { width:100%; height:100%; object-fit:cover; display:block; }
+.image-chip .remove-chip { position:absolute; top:2px; right:2px; width:18px; height:18px; font-size:14px; border-radius:50%; background:rgba(0,0,0,0.65); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.user-bubble img.attached-image { display:block; max-width:220px; max-height:220px; border-radius:12px; margin-bottom:8px; object-fit:cover; }
 
 /* SETTINGS + ABOUT */
-.page h1 {
-  font-size: 1.6rem;
-  margin-bottom: 12px;
-  color: var(--text-high);
+.page h1 { font-size:1.6rem; margin-bottom:12px; color:var(--text-high); }
+.page p { font-size:1rem; color:var(--text-med); max-width:700px; line-height:1.6; white-space:pre-line; }
+.settings-group { margin-top:32px; max-width:480px; }
+.settings-label { font-size:1rem; font-weight:600; color:var(--text-high); margin-bottom:14px; }
+.theme-options { display:flex; gap:14px; }
+.theme-swatch { flex:1; display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); background:rgba(255,255,255,0.02); color:var(--text-med); font-size:0.9rem; cursor:pointer; transition:0.2s; }
+.theme-swatch:hover { border-color:var(--border-strong); }
+.theme-swatch.active { border-color:var(--brand-primary); color:var(--text-high); font-weight:600; }
+.swatch-preview { width:100%; height:44px; border-radius:8px; border:1px solid var(--border-subtle); }
+.swatch-dark { background:linear-gradient(135deg,#000 0%,#2a2a2a 100%); }
+.swatch-light { background:linear-gradient(135deg,#ffffff 0%,#d8d8d8 100%); }
+.settings-hint { margin-top:14px; font-size:0.8rem; color:var(--text-low); max-width:480px; }
+
+/* MULTI-CHAT SETUP */
+.mc-select { height:42px; padding:0 14px; border-radius:var(--radius-md); border:1px solid var(--border-strong); background:rgba(255,255,255,0.03); color:var(--text-high); font-size:0.9rem; cursor:pointer; }
+.mc-model-row { display:flex; align-items:center; gap:12px; margin-top:10px; }
+.mc-model-row label { width:70px; flex-shrink:0; font-size:0.85rem; color:var(--text-med); }
+.mc-model-row select { flex:1; max-width:320px; height:40px; padding:0 12px; border-radius:var(--radius-md); border:1px solid var(--border-strong); background:rgba(255,255,255,0.03); color:var(--text-high); font-size:0.85rem; cursor:pointer; }
+.mc-start-btn { margin-top:32px; height:46px; padding:0 32px; border-radius:var(--radius-pill); border:none; background:var(--brand-primary); color:var(--on-brand); font-size:0.95rem; font-weight:700; cursor:pointer; transition:0.2s; }
+.mc-start-btn:hover { transform:scale(1.03); }
+
+/* MULTI-CHAT SPLIT VIEW */
+#multichatPage { padding:0; }
+#multichatPage.active { display:flex; flex-direction:column; height:calc(100vh - 64px); }
+.multichat-columns { flex:1; display:flex; flex-direction:row; overflow-x:auto; overflow-y:hidden; min-height:0; }
+.multichat-column { flex:1; min-width:240px; display:flex; flex-direction:column; border-right:1px solid var(--border-subtle); overflow:hidden; }
+.multichat-column:last-child { border-right:none; }
+.multichat-column-header { height:44px; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:0 12px; font-size:0.82rem; font-weight:600; color:var(--text-med); border-bottom:1px solid var(--border-subtle); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.multichat-column-messages { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px; }
+.multichat-column-messages .user-bubble,.multichat-column-messages .ai-bubble { font-size:0.88rem; }
+.multichat-column-messages .user-bubble { max-width:92%; }
+
+/* Multi-chat uses .input-region + .composer directly — no extra overrides needed */
+
+/* RESPONSIVE */
+@media (max-width:768px) {
+  #sidebar { position:fixed; top:0; left:0; height:100vh; width:260px; transform:translateX(-100%); transition:transform 0.25s ease; z-index:20; box-shadow:4px 0 24px rgba(0,0,0,0.5); }
+  #sidebar:not(.collapsed) { transform:translateX(0); }
+  #sidebar.collapsed { width:260px; transform:translateX(-100%); }
+  #sidebar.collapsed .nav-text { opacity:1; pointer-events:auto; }
+  .header-bar { padding:0 16px; }
+  .mobile-menu-btn { display:flex; align-items:center; justify-content:center; }
+  .page { padding:16px; }
+  #chat-scroller { padding:20px 0 16px; }
+  #chat-container { padding:0 12px; }
+  .user-bubble { max-width:88%; padding:10px 16px; }
+  .input-region { padding:14px; }
+  .composer { padding:10px 12px; border-radius:24px; }
+  #userInput,#mcUserInput { font-size:1rem; min-height:38px; padding:6px 8px; }
+  .model-dropdown { min-width:0; flex:1; }
+  .model-dropdown-toggle .label { font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .toolbar-left { flex:1; min-width:0; }
 }
-
-.page p {
-  font-size: 1rem;
-  color: var(--text-med);
-  max-width: 700px;
-  line-height: 1.6;
-}
-
-/* ————————————————
-   SETTINGS — theme picker
-——————————————— */
-.settings-group {
-  margin-top: 32px;
-  max-width: 480px;
-}
-
-.settings-label {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-high);
-  margin-bottom: 14px;
-}
-
-.theme-options {
-  display: flex;
-  gap: 14px;
-}
-
-.theme-swatch {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text-med);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.theme-swatch:hover {
-  border-color: var(--border-strong);
-}
-
-.theme-swatch.active {
-  border-color: var(--brand-primary);
-  color: var(--text-high);
-  font-weight: 600;
-}
-
-.swatch-preview {
-  width: 100%;
-  height: 44px;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-}
-
-.swatch-dark {
-  background: linear-gradient(135deg, #000 0%, #2a2a2a 100%);
-}
-
-.swatch-light {
-  background: linear-gradient(135deg, #ffffff 0%, #d8d8d8 100%);
-}
-
-.settings-hint {
-  margin-top: 14px;
-  font-size: 0.8rem;
-  color: var(--text-low);
-  max-width: 480px;
-}
-
-/* ————————————————
-   RESPONSIVE / MOBILE
-——————————————— */
-@media (max-width: 768px) {
-  #sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 260px;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
-    z-index: 20;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
-  }
-
-  #sidebar:not(.collapsed) {
-    transform: translateX(0);
-  }
-
-  /* On mobile, "collapsed" means fully hidden off-canvas, not icon-rail */
-  #sidebar.collapsed {
-    width: 260px;
-    transform: translateX(-100%);
-  }
-
-  #sidebar.collapsed .nav-text {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .header-bar {
-    padding: 0 16px;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .page {
-    padding: 16px;
-  }
-
-  #chat-scroller {
-    padding: 20px 0 16px;
-  }
-
-  #chat-container {
-    padding: 0 12px;
-  }
-
-  .user-bubble {
-    max-width: 88%;
-    padding: 10px 16px;
-  }
-
-  .input-region {
-    padding: 14px;
-  }
-
-  .composer {
-    padding: 10px 12px;
-    border-radius: 24px;
-  }
-
-  #userInput {
-    font-size: 1rem;
-    min-height: 38px;
-    padding: 6px 8px;
-  }
-
-  .model-dropdown {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .model-dropdown-toggle .label {
-    font-size: 0.8rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .toolbar-left {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-@media (max-width: 420px) {
-  .logo-text {
-    font-size: 1.3rem;
-  }
-
-  .bg-toggle-label {
-    display: none;
-  }
-
-  .header-signin-label {
-    display: none;
-  }
-
-  .header-signin-btn {
-    padding: 0 9px;
-  }
-
-  .header-right {
-    gap: 10px;
-  }
-
-  #sendBtn,
-  #stopBtn {
-    width: 40px;
-    height: 40px;
-  }
-
-  .btn-action-plus {
-    width: 32px;
-    height: 32px;
-  }
+@media (max-width:420px) {
+  .logo-text { font-size:1.3rem; }
+  .bg-toggle-label { display:none; }
+  .header-signin-label { display:none; }
+  .header-signin-btn { padding:0 9px; }
+  .header-right { gap:10px; }
+  #sendBtn,#stopBtn,#mcSendBtn { width:40px; height:40px; }
+  .btn-action-plus { width:32px; height:32px; }
 }
   </style>
 </head>
-
 <body>
 
-  <!-- MATRIX-OCEAN BACKGROUND -->
   <canvas id="matrixCanvas"></canvas>
 
-  <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="sidebar-header">
       <div class="menu-toggle material-symbols-rounded" id="toggleSidebar">menu</div>
     </div>
-
     <div class="nav-top">
       <div class="nav-link" id="navNewChat">
         <span class="material-symbols-rounded">add</span>
         <span class="nav-text">New Chat</span>
       </div>
-
       <div class="nav-link active" id="navConversation">
         <span class="material-symbols-rounded">chat</span>
         <span class="nav-text">Conversation</span>
       </div>
-
+      <div class="nav-link" id="navMultiChat">
+        <span class="material-symbols-rounded">view_column</span>
+        <span class="nav-text">Multi-Chat</span>
+      </div>
       <div class="history-heading nav-text" id="historyHeading">Chat History</div>
       <div id="historyList"></div>
     </div>
-
     <div class="nav-bottom">
       <div class="nav-link" id="navSettings">
         <span class="material-symbols-rounded">settings</span>
         <span class="nav-text">Settings</span>
       </div>
-
       <div class="nav-link" id="navAbout">
         <span class="material-symbols-rounded">info</span>
         <span class="nav-text">About</span>
       </div>
-
-      <div class="account-box" id="accountBox">
-        <!-- Filled in by JS only once signed in: avatar + name + logout icon.
-             Empty (nothing rendered) while signed out — the sign-in button
-             now lives in the header instead. -->
-      </div>
+      <div class="account-box" id="accountBox"></div>
     </div>
   </aside>
 
-  <!-- MAIN VIEWPORT -->
   <main class="viewport" id="viewportMain">
 
     <header class="header-bar">
       <div class="header-left">
         <div class="mobile-menu-btn material-symbols-rounded" id="mobileMenuToggle">menu</div>
-        <div class="logo-text">
-          rReplay<span class="beta-tag">BETA</span>
-        </div>
+        <div class="logo-text">rReplay<span class="beta-tag">BETA</span></div>
       </div>
-
       <div class="header-right">
         <label class="bg-toggle" for="backgroundToggle">
           <span class="bg-toggle-label">Background</span>
@@ -1127,7 +354,6 @@ body {
             <span class="toggle-slider"></span>
           </span>
         </label>
-
         <a class="header-signin-btn" id="headerSigninBtn" href="https://llama-backend-1-qq3f.onrender.com/auth/google/login">
           <span class="material-symbols-rounded" style="font-size:18px;">login</span>
           <span class="header-signin-label">Sign in</span>
@@ -1137,111 +363,123 @@ body {
 
     <!-- CONVERSATION PAGE -->
     <section class="page active" id="conversationPage">
-
-      <div id="chat-scroller">
-        <div id="chat-container"></div>
-      </div>
-
+      <div id="chat-scroller"><div id="chat-container"></div></div>
       <div class="input-region">
         <div class="composer">
-
           <div class="image-preview-row" id="imagePreviewRow"></div>
-
           <textarea id="userInput" placeholder="Send a message..."></textarea>
-
           <div class="composer-toolbar">
-
             <div class="toolbar-left">
-
               <div class="btn-action-plus material-symbols-rounded" id="plusBtn" title="Attach an image">add</div>
               <input type="file" id="imageFileInput" accept="image/*" hidden />
-
               <div class="model-dropdown" id="modelDropdown">
                 <div class="model-dropdown-toggle" id="modelDropdownToggle">
                   <span class="label" id="modelDropdownLabel">GEMINI 2.5</span>
                   <span class="material-symbols-rounded">expand_more</span>
                 </div>
-
                 <div class="model-dropdown-menu" id="modelDropdownMenu">
                   <div class="model-option active" data-model="gemini">
                     <span class="option-label">GEMINI 2.5</span>
                     <div class="sublabel">Empowered by Gemini 2.5 Flash‑Lite</div>
                   </div>
-
                   <div class="model-option" data-model="llama3-70b">
                     <span class="option-label">LLAMA 3.3</span>
                     <div class="sublabel">Empowered by Llama 3.3 70B</div>
                   </div>
-
                   <div class="model-option" data-model="gpt4o-mini">
                     <span class="option-label">CHATGPT 4o</span>
                     <div class="sublabel">Empowered by GPT‑4o Mini</div>
                   </div>
-
                   <div class="model-option" data-model="deepseek-v4-flash">
                     <span class="option-label">DEEPSEEK V4</span>
                     <div class="sublabel">Empowered by DeepSeek V4‑Flash</div>
                   </div>
-
                   <div class="model-option" data-model="gemma3">
                     <span class="option-label">GEMMA 3</span>
                     <div class="sublabel">Empowered by Gemma 3</div>
                   </div>
                 </div>
               </div>
-
             </div>
-
             <button id="sendBtn" class="material-symbols-rounded">send</button>
             <button id="stopBtn" class="material-symbols-rounded">stop</button>
-
           </div>
         </div>
         <p class="disclaimer">rReplay is an AI. Some information may not be accurate.</p>
       </div>
-
     </section>
 
-    <!-- SETTINGS PAGE -->
+    <!-- MULTI-CHAT SETUP -->
+    <section class="page" id="multichatSetupPage">
+      <h1>Multi-Chat</h1>
+      <p>Send one message to 2–5 models at the same time.</p>
+      <div class="settings-group">
+        <h2 class="settings-label">Number of chats</h2>
+        <select class="mc-select" id="mcChatCount">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+      <div class="settings-group" id="mcModelPickers">
+        <h2 class="settings-label">Models</h2>
+      </div>
+      <button class="mc-start-btn" id="mcStartBtn">Start</button>
+    </section>
+
+    <!-- MULTI-CHAT SPLIT VIEW -->
+    <section class="page" id="multichatPage">
+      <div class="multichat-columns" id="multichatColumns"></div>
+      <!-- Identical markup to the main composer — same classes, same look -->
+      <div class="input-region">
+        <div class="composer">
+          <div class="image-preview-row" id="mcImagePreviewRow"></div>
+          <textarea id="mcUserInput" placeholder="Send a message to all chats..."></textarea>
+          <div class="composer-toolbar">
+            <div class="toolbar-left">
+              <div class="btn-action-plus material-symbols-rounded" id="mcPlusBtn" title="Attach an image">add</div>
+              <input type="file" id="mcImageFileInput" accept="image/*" hidden />
+            </div>
+            <button id="mcSendBtn" class="material-symbols-rounded">send</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
     <section class="page" id="settingsPage">
       <h1>Settings</h1>
       <p>Personalize how rReplay looks. More options coming soon.</p>
-
       <div class="settings-group">
         <h2 class="settings-label">Color theme</h2>
         <div class="theme-options">
-          <button class="theme-swatch active" id="themeDarkBtn" data-theme-choice="dark">
-            <span class="swatch-preview swatch-dark"></span>
-            Dark
+          <button class="theme-swatch active" id="themeDarkBtn">
+            <span class="swatch-preview swatch-dark"></span>Dark
           </button>
-          <button class="theme-swatch" id="themeLightBtn" data-theme-choice="light">
-            <span class="swatch-preview swatch-light"></span>
-            Light
+          <button class="theme-swatch" id="themeLightBtn">
+            <span class="swatch-preview swatch-light"></span>Light
           </button>
         </div>
         <p class="settings-hint">Switch between Dark and Light mode.</p>
       </div>
     </section>
 
-    <!-- ABOUT PAGE -->
+    <!-- ABOUT / TERMS -->
     <section class="page" id="aboutPage">
       <h1>TERMS OF SERVICE</h1>
       <p>**Acceptance of Terms  
-By accessing or using rReplay (the “Service”), you agree to these Terms of Service. If you do not agree, do not use the Service.**
+By accessing or using rReplay (the "Service"), you agree to these Terms of Service. If you do not agree, do not use the Service.**
 
-        
 2. Eligibility  
 You must be at least 13 years old to use the Service. If you are under 18, you need permission from a parent or legal guardian.
 
-        
 3. Accounts & Authentication  
 You may create an account using Google Sign-In.  
 You agree to provide accurate information and keep your account secure.  
 You are responsible for all activity that occurs under your account.  
-       
 We may suspend or terminate accounts that violate these Terms.
 
-        
 4. Use of the Service  
 You agree not to use the Service to:  
 - break any laws  
@@ -1252,219 +490,125 @@ You agree not to use the Service to:
 
 We may limit usage to prevent abuse or protect system stability.
 
-        
 5. AI Output Disclaimer  
 The Service uses AI models to generate responses.  
-AI output may be:  
-- inaccurate  
-- incomplete  
-- offensive  
-- unexpected  
-
+AI output may be inaccurate, incomplete, offensive, or unexpected.  
 You agree not to rely on AI output for legal, medical, financial, or safety-critical decisions.  
 You are responsible for how you use the generated content.
 
-        
 6. User Content  
 You keep ownership of the content you submit.  
 By using the Service, you allow us to store and process your content to provide the Service.  
-
 We do not sell your data.
 
-        
 7. Privacy  
 Your use of the Service is also governed by our Privacy Policy.  
 We use cookies to maintain login sessions (for example, session_token).
 
-        
 8. Rate Limits & Fair Use  
 We may apply rate limits or usage restrictions to ensure stable operation.  
 Excessive or automated usage may result in temporary or permanent suspension.
 
-        
 9. Service Availability  
 We may update, modify, or discontinue parts of the Service at any time.  
 We are not responsible for downtime, data loss, or service interruptions.
 
-        
 10. Third-Party Services  
-The Service integrates with third-party APIs (for example, Google, OpenAI, Groq, DeepSeek, Gemini).  
+The Service integrates with third-party APIs (Google, OpenAI, Groq, DeepSeek, Gemini).  
 Their terms also apply when you use features powered by those services.
 
-        
 11. Termination  
 We may suspend or terminate your access if you violate these Terms.  
 You may stop using the Service at any time.
 
-        
 12. Limitation of Liability  
-To the fullest extent permitted by law:  
-We are not liable for any damages resulting from your use of the Service.  
-The Service is provided “as is” without warranties of any kind.
+To the fullest extent permitted by law, we are not liable for any damages resulting from your use of the Service.  
+The Service is provided "as is" without warranties of any kind.
 
 13. Changes to Terms  
 We may update these Terms at any time.  
 Continued use of the Service means you accept the updated Terms.
 
 14. Contact  
-If you have questions about these Terms, contact us at: eidanplaz@gmail.com 
-
-</p>
+If you have questions about these Terms, contact us at: eidanplaz@gmail.com</p>
     </section>
 
   </main>
 
 <script>
-/* ————————————————————————————————————
-   MATRIX-OCEAN BACKGROUND ANIMATION
-———————————————————————————————————— */
+/* MATRIX-OCEAN BACKGROUND */
 (function () {
   const canvas = document.getElementById('matrixCanvas');
   const ctx = canvas.getContext('2d');
-
   let W, H, cols, rows;
-  const fontSize = 14;
-  const cellW = fontSize * 0.62;
-  const cellH = fontSize * 0.82;
-
+  const fontSize = 14, cellW = fontSize * 0.62, cellH = fontSize * 0.82;
   const ramp = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
-
   const permSize = 256;
   let perm = new Uint8Array(permSize * 2);
   (function initPerm() {
     const p = new Uint8Array(permSize);
     for (let i = 0; i < permSize; i++) p[i] = i;
-    for (let i = permSize - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [p[i], p[j]] = [p[j], p[i]];
-    }
+    for (let i = permSize - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
     for (let i = 0; i < permSize * 2; i++) perm[i] = p[i & 255];
   })();
-
-  function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-  function lerp(a, b, t) { return a + t * (b - a); }
-  function grad(hash, x, y) {
-    const h = hash & 7;
-    const u = h < 4 ? x : y;
-    const v = h < 4 ? y : x;
-    return ((h & 1) ? -u : u) + ((h & 2) ? -2 * v : 2 * v);
+  function fade(t) { return t*t*t*(t*(t*6-15)+10); }
+  function lerp(a,b,t) { return a+t*(b-a); }
+  function grad(hash,x,y) { const h=hash&7,u=h<4?x:y,v=h<4?y:x; return ((h&1)?-u:u)+((h&2)?-2*v:2*v); }
+  function noise2D(x,y) {
+    const X=Math.floor(x)&255,Y=Math.floor(y)&255,xf=x-Math.floor(x),yf=y-Math.floor(y);
+    const u=fade(xf),v=fade(yf);
+    const aa=perm[perm[X]+Y],ab=perm[perm[X]+Y+1],ba=perm[perm[X+1]+Y],bb=perm[perm[X+1]+Y+1];
+    return lerp(lerp(grad(aa,xf,yf),grad(ba,xf-1,yf),u),lerp(grad(ab,xf,yf-1),grad(bb,xf-1,yf-1),u),v);
   }
-  function noise2D(x, y) {
-    const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
-    const xf = x - Math.floor(x), yf = y - Math.floor(y);
-    const u = fade(xf), v = fade(yf);
-    const aa = perm[perm[X] + Y], ab = perm[perm[X] + Y + 1];
-    const ba = perm[perm[X + 1] + Y], bb = perm[perm[X + 1] + Y + 1];
-    const x1 = lerp(grad(aa, xf, yf), grad(ba, xf - 1, yf), u);
-    const x2 = lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u);
-    return lerp(x1, x2, v);
-  }
-  function fbm(x, y) {
-    let val = 0, amp = 0.5, freq = 1, sum = 0;
-    for (let o = 0; o < 4; o++) {
-      val += amp * noise2D(x * freq, y * freq);
-      sum += amp;
-      amp *= 0.5;
-      freq *= 2;
-    }
-    return val / sum;
-  }
-
-  function resize() {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.width = W;
-    canvas.height = H;
-    cols = Math.ceil(W / cellW);
-    rows = Math.ceil(H / cellH);
-  }
-
-  let t = 0;
-  let introStart = null;
-  const introDuration = 1200;
-  let introDone = false;
-
-  // Toggled by the "Background" switch in the header. When false, the
-  // canvas still fills with the current theme's solid color, but the
-  // symbol field itself is skipped.
-  let backgroundEnabled = true;
-  window.setMatrixBackgroundEnabled = function (enabled) {
-    backgroundEnabled = enabled;
-  };
-
-  function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
-
+  function fbm(x,y) { let val=0,amp=0.5,freq=1,sum=0; for(let o=0;o<4;o++){val+=amp*noise2D(x*freq,y*freq);sum+=amp;amp*=0.5;freq*=2;} return val/sum; }
+  function resize() { W=window.innerWidth;H=window.innerHeight;canvas.width=W;canvas.height=H;cols=Math.ceil(W/cellW);rows=Math.ceil(H/cellH); }
+  let t=0,introStart=null,introDone=false;
+  const introDuration=1200;
+  let backgroundEnabled=true;
+  window.setMatrixBackgroundEnabled=function(e){backgroundEnabled=e;};
+  function easeOutCubic(p){return 1-Math.pow(1-p,3);}
   function draw(timestamp) {
-    if (introStart === null) introStart = timestamp;
-    const elapsed = timestamp - introStart;
-
-    let progress = 1;
-    if (!introDone) {
-      progress = Math.min(1, elapsed / introDuration);
-      if (progress >= 1) introDone = true;
-    }
-
-    const isLight = document.documentElement.getAttribute("data-theme") === "light";
-
-    ctx.fillStyle = isLight ? "#ffffff" : "#000000";
-    ctx.fillRect(0, 0, W, H);
-
-    if (!backgroundEnabled) {
-      // Plain solid background only — skip the symbol field entirely.
-      requestAnimationFrame(draw);
-      return;
-    }
-
-    ctx.font = fontSize + "px monospace";
-    ctx.textBaseline = "top";
-
-    const scale = 0.06;
-    const drift = t * 0.35;
-
-    const archLead = 0.18;
-    const waveAmp = H * 0.035;
-    const waveFreq = 0.18;
-    const waveSpeed = 0.0045;
-    let colOffsets = null;
-    if (!introDone) {
-      colOffsets = new Float32Array(cols);
-      for (let x = 0; x < cols; x++) {
-        const archShape = Math.sin((x / Math.max(1, cols - 1)) * Math.PI);
-        const colProgress = Math.min(1, progress + archShape * archLead);
-        const colEase = easeOutCubic(colProgress);
-        let off = (1 - colEase) * H * 0.55;
-        const ripple = (1 - progress) * waveAmp * Math.sin(x * waveFreq + elapsed * waveSpeed);
-        off += ripple;
-        colOffsets[x] = off;
+    if(introStart===null) introStart=timestamp;
+    const elapsed=timestamp-introStart;
+    let progress=1;
+    if(!introDone){progress=Math.min(1,elapsed/introDuration);if(progress>=1)introDone=true;}
+    const isLight=document.documentElement.getAttribute("data-theme")==="light";
+    ctx.fillStyle=isLight?"#ffffff":"#000000";
+    ctx.fillRect(0,0,W,H);
+    if(!backgroundEnabled){requestAnimationFrame(draw);return;}
+    ctx.font=fontSize+"px monospace";ctx.textBaseline="top";
+    const scale=0.06,drift=t*0.35,archLead=0.18,waveAmp=H*0.035,waveFreq=0.18,waveSpeed=0.0045;
+    let colOffsets=null;
+    if(!introDone){
+      colOffsets=new Float32Array(cols);
+      for(let x=0;x<cols;x++){
+        const arch=Math.sin((x/Math.max(1,cols-1))*Math.PI);
+        const cp=Math.min(1,progress+arch*archLead);
+        let off=(1-easeOutCubic(cp))*H*0.55;
+        off+=(1-progress)*waveAmp*Math.sin(x*waveFreq+elapsed*waveSpeed);
+        colOffsets[x]=off;
       }
     }
-
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        let n = fbm(x * scale + drift, y * scale * 1.4 - t * 0.15);
-        n += 0.15 * Math.sin(x * 0.05 + t * 0.6) * Math.cos(y * 0.05 - t * 0.4);
-
-        let intensity = (n + 1) / 2;
-        intensity = Math.max(0, Math.min(1, intensity));
-        intensity = Math.pow(intensity, 1.3);
-
-        const idx = Math.floor(intensity * (ramp.length - 1));
-        const ch = ramp[idx];
-        if (ch === ' ') continue;
-
-        const shade = Math.floor(90 + intensity * 165);
-        const c = isLight ? 255 - shade : shade;
-        ctx.fillStyle = `rgba(${c}, ${c}, ${c}, ${0.55 + intensity * 0.45})`;
-        const yPos = colOffsets ? y * cellH + colOffsets[x] : y * cellH;
-        ctx.fillText(ch, x * cellW, yPos);
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        let n=fbm(x*scale+drift,y*scale*1.4-t*0.15);
+        n+=0.15*Math.sin(x*0.05+t*0.6)*Math.cos(y*0.05-t*0.4);
+        let intensity=(n+1)/2;
+        intensity=Math.max(0,Math.min(1,intensity));
+        intensity=Math.pow(intensity,1.3);
+        const idx=Math.floor(intensity*(ramp.length-1));
+        const ch=ramp[idx];
+        if(ch===' ')continue;
+        const shade=Math.floor(90+intensity*165);
+        const c=isLight?255-shade:shade;
+        ctx.fillStyle=`rgba(${c},${c},${c},${0.55+intensity*0.45})`;
+        ctx.fillText(ch,x*cellW,colOffsets?y*cellH+colOffsets[x]:y*cellH);
       }
     }
-
-    if (introDone) t += 0.016;
+    if(introDone)t+=0.016;
     requestAnimationFrame(draw);
   }
-
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize',resize);
   resize();
   requestAnimationFrame(draw);
 })();
@@ -1473,37 +617,30 @@ If you have questions about these Terms, contact us at: eidanplaz@gmail.com
 <script>
 const BACKEND_URL = "https://llama-backend-1-qq3f.onrender.com";
 
-// --- SINGLE BACKGROUND PING ---
 setInterval(() => {
-  fetch(`${BACKEND_URL}/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: "ping",
-      model: "gemini"
-    })
-  })
-  .then(() => console.log("Backend heartbeat sent"))
-  .catch(() => {});
-}, 10 * 60 * 1000); 
+  fetch(`${BACKEND_URL}/chat`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"ping",model:"gemini"})})
+  .then(()=>console.log("Backend heartbeat sent")).catch(()=>{});
+}, 10*60*1000);
 
-// DOM ELEMENTS
+// DOM
 const chatContainer = document.getElementById("chat-container");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 const stopBtn = document.getElementById("stopBtn");
 const sidebar = document.getElementById("sidebar");
-const viewportMain = document.getElementById("viewportMain");
 const toggleSidebarBtn = document.getElementById("toggleSidebar");
 
 const navNewChat = document.getElementById("navNewChat");
 const navConversation = document.getElementById("navConversation");
+const navMultiChat = document.getElementById("navMultiChat");
 const navSettings = document.getElementById("navSettings");
 const navAbout = document.getElementById("navAbout");
 
 const conversationPage = document.getElementById("conversationPage");
 const settingsPage = document.getElementById("settingsPage");
 const aboutPage = document.getElementById("aboutPage");
+const multichatSetupPage = document.getElementById("multichatSetupPage");
+const multichatPage = document.getElementById("multichatPage");
 
 const modelDropdown = document.getElementById("modelDropdown");
 const modelDropdownToggle = document.getElementById("modelDropdownToggle");
@@ -1511,159 +648,81 @@ const modelDropdownMenu = document.getElementById("modelDropdownMenu");
 const modelDropdownLabel = document.getElementById("modelDropdownLabel");
 const modelOptions = Array.from(document.querySelectorAll(".model-option"));
 
-// --- STATE & MEMORY ---
+// STATE
 let currentModel = "gemini";
-let chatHistory = []; 
+let chatHistory = [];
 let generationActive = false;
 let abortController = null;
-let currentConversationId = null; // null = guest chat or a not-yet-saved new chat
-let currentUser = null;           // filled in by checkAuth() on load
-
-// If the backend hasn't replied within this window, assume it's a cold
-// start (e.g. Render free tier spinning up) and switch the indicator.
+let currentConversationId = null;
+let currentUser = null;
 const CODESTART_THRESHOLD_MS = 4000;
 
-// --- WELCOME MESSAGE (shown on a fresh/empty conversation) ---
+// WELCOME MESSAGES
 const WELCOME_MESSAGES = [
-  "Hey, how's it going?",
-  "Ask anything",
-  "What's up?",
-  "Hi from rReplay! Now let me do the searching!",
-  "Ready when you are",
-  "What can I help with?",
-  "Let's get started",
-  "Good to see you",
-  "Type something to begin"
+  "Hey, how's it going?","Ask anything","What's up?",
+  "Hi from rReplay! Now let me do the searching!","Ready when you are",
+  "What can I help with?","Let's get started","Good to see you","Type something to begin"
 ];
-
 function showWelcomeMessage() {
   hideWelcomeMessage();
   const div = document.createElement("div");
-  div.id = "welcomeMessage";
-  div.className = "welcome-message";
-  div.textContent = WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)];
+  div.id = "welcomeMessage"; div.className = "welcome-message";
+  div.textContent = WELCOME_MESSAGES[Math.floor(Math.random()*WELCOME_MESSAGES.length)];
   chatContainer.appendChild(div);
 }
-
-function hideWelcomeMessage() {
-  const el = document.getElementById("welcomeMessage");
-  if (el) el.remove();
-}
-
-const AI_PERSONALITY = `
-You are rReplay, an AI assistant who speaks clearly, helpfully, and with confidence.
-You keep answers short and simple unless the user asks for detail.
-You ALWAYS reply to the user's previous input, never restart the conversation.
-You always stay friendly, smart, and consistent.
-You were trained by Google, and your AI model is Gemini 2.5 Flash, but do not say that unless the user asks. 
-You, rReplay, was made by Eidan, a small developer who loves coding, but do not say that unless the user asks.
-Dont be TOOO friendly, just be nice.
-`;
+function hideWelcomeMessage() { const el=document.getElementById("welcomeMessage"); if(el)el.remove(); }
 
 // PAGE SWITCHER
 function setActivePage(page) {
-  conversationPage.classList.remove("active");
-  settingsPage.classList.remove("active");
-  aboutPage.classList.remove("active");
-
-  navNewChat.classList.remove("active");
-  navConversation.classList.remove("active");
-  navSettings.classList.remove("active");
-  navAbout.classList.remove("active");
-
-  const inputRegion = document.querySelector(".input-region");
+  [conversationPage,settingsPage,aboutPage,multichatSetupPage,multichatPage].forEach(p=>p.classList.remove("active"));
+  [navNewChat,navConversation,navMultiChat,navSettings,navAbout].forEach(n=>n.classList.remove("active"));
+  const inputRegion = document.querySelector("#conversationPage .input-region");
   const chatScroller = document.getElementById("chat-scroller");
-
   inputRegion.style.display = "none";
   chatScroller.style.display = "none";
-
   if (page === "conversation") {
-    conversationPage.classList.add("active");
-    navConversation.classList.add("active");
-    inputRegion.style.display = "flex";
-    chatScroller.style.display = "flex";
-  } else if (page === "settings") {
-    settingsPage.classList.add("active");
-    navSettings.classList.add("active");
-  } else if (page === "about") {
-    aboutPage.classList.add("active");
-    navAbout.classList.add("active");
-  }
+    conversationPage.classList.add("active"); navConversation.classList.add("active");
+    inputRegion.style.display = "flex"; chatScroller.style.display = "flex";
+  } else if (page === "settings") { settingsPage.classList.add("active"); navSettings.classList.add("active");
+  } else if (page === "about") { aboutPage.classList.add("active"); navAbout.classList.add("active");
+  } else if (page === "multichatSetup") { multichatSetupPage.classList.add("active"); navMultiChat.classList.add("active");
+  } else if (page === "multichat") { multichatPage.classList.add("active"); navMultiChat.classList.add("active"); }
 }
 
-// SIDEBAR BUTTONS
+// SIDEBAR NAV
 navNewChat.onclick = () => {
-  chatContainer.innerHTML = "";
-  chatHistory = [];
-  currentConversationId = null;
-  document.querySelectorAll(".history-item.active").forEach(el => el.classList.remove("active"));
-  showWelcomeMessage();
-  setActivePage("conversation");
+  chatContainer.innerHTML = ""; chatHistory = []; currentConversationId = null;
+  document.querySelectorAll(".history-item.active").forEach(el=>el.classList.remove("active"));
+  showWelcomeMessage(); setActivePage("conversation");
 };
-
 navConversation.onclick = () => setActivePage("conversation");
+navMultiChat.onclick = () => setActivePage("multichatSetup");
 navSettings.onclick = () => setActivePage("settings");
 navAbout.onclick = () => setActivePage("about");
 
-toggleSidebarBtn.onclick = () => {
-  sidebar.classList.toggle("collapsed");
-};
+toggleSidebarBtn.onclick = () => sidebar.classList.toggle("collapsed");
 
 const mobileMenuToggle = document.getElementById("mobileMenuToggle");
-mobileMenuToggle.onclick = (e) => {
-  e.stopPropagation();
-  sidebar.classList.toggle("collapsed");
-};
+mobileMenuToggle.onclick = (e) => { e.stopPropagation(); sidebar.classList.toggle("collapsed"); };
 
-// RESPONSIVE: sidebar closed by default on phones
-function isMobile() {
-  return window.matchMedia("(max-width: 768px)").matches;
-}
-
-if (isMobile()) {
-  sidebar.classList.add("collapsed");
-}
-
-// Tapping outside an open sidebar on mobile closes it
+function isMobile() { return window.matchMedia("(max-width:768px)").matches; }
+if (isMobile()) sidebar.classList.add("collapsed");
 document.addEventListener("click", (e) => {
-  if (
-    isMobile() &&
-    !sidebar.classList.contains("collapsed") &&
-    !sidebar.contains(e.target) &&
-    e.target !== toggleSidebarBtn
-  ) {
+  if (isMobile() && !sidebar.classList.contains("collapsed") && !sidebar.contains(e.target) && e.target !== toggleSidebarBtn)
     sidebar.classList.add("collapsed");
-  }
 });
-
-// Keep sidebar state sensible when crossing the mobile/desktop breakpoint
 let wasMobile = isMobile();
-window.addEventListener("resize", () => {
-  const nowMobile = isMobile();
-  if (nowMobile !== wasMobile) {
-    sidebar.classList.toggle("collapsed", nowMobile);
-    wasMobile = nowMobile;
-  }
-});
+window.addEventListener("resize", () => { const now=isMobile(); if(now!==wasMobile){sidebar.classList.toggle("collapsed",now);wasMobile=now;} });
 
 // MODEL DROPDOWN
-modelDropdownToggle.addEventListener("click", () => {
-  modelDropdownMenu.classList.toggle("open");
-});
-
-document.addEventListener("click", (e) => {
-  if (!modelDropdown.contains(e.target)) {
-    modelDropdownMenu.classList.remove("open");
-  }
-});
-
-modelOptions.forEach((opt) => {
+modelDropdownToggle.addEventListener("click", () => modelDropdownMenu.classList.toggle("open"));
+document.addEventListener("click", (e) => { if(!modelDropdown.contains(e.target)) modelDropdownMenu.classList.remove("open"); });
+modelOptions.forEach(opt => {
   opt.addEventListener("click", () => {
-    modelOptions.forEach((o) => o.classList.remove("active"));
-    opt.classList.add("active");
+    modelOptions.forEach(o=>o.classList.remove("active")); opt.classList.add("active");
     currentModel = opt.getAttribute("data-model");
-    const displayLabel = opt.querySelector(".option-label");
-    modelDropdownLabel.textContent = displayLabel ? displayLabel.textContent : currentModel;
+    const lbl = opt.querySelector(".option-label");
+    modelDropdownLabel.textContent = lbl ? lbl.textContent : currentModel;
     modelDropdownMenu.classList.remove("open");
   });
 });
@@ -1672,393 +731,331 @@ modelOptions.forEach((opt) => {
 const plusBtn = document.getElementById("plusBtn");
 const imageFileInput = document.getElementById("imageFileInput");
 const imagePreviewRow = document.getElementById("imagePreviewRow");
-let pendingImage = null; // { dataUrl, mimeType, name }
-
+let pendingImage = null;
 plusBtn.onclick = () => imageFileInput.click();
-
 imageFileInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    alert("Please choose an image file.");
-    imageFileInput.value = "";
-    return;
-  }
+  const file = e.target.files[0]; if(!file)return;
+  if(!file.type.startsWith("image/")){ alert("Please choose an image file."); imageFileInput.value=""; return; }
   const reader = new FileReader();
-  reader.onload = () => {
-    pendingImage = { dataUrl: reader.result, mimeType: file.type, name: file.name };
-    renderImagePreview();
-  };
+  reader.onload = () => { pendingImage={dataUrl:reader.result,mimeType:file.type,name:file.name}; renderImagePreview(); };
   reader.readAsDataURL(file);
 });
-
 function renderImagePreview() {
-  if (!pendingImage) {
-    imagePreviewRow.style.display = "none";
-    imagePreviewRow.innerHTML = "";
-    return;
-  }
-  imagePreviewRow.innerHTML = `
-    <div class="image-chip">
-      <img src="${pendingImage.dataUrl}" alt="${pendingImage.name}" />
-      <span class="remove-chip material-symbols-rounded" id="removeImageChip">close</span>
-    </div>`;
-  imagePreviewRow.style.display = "flex";
+  if(!pendingImage){ imagePreviewRow.style.display="none"; imagePreviewRow.innerHTML=""; return; }
+  imagePreviewRow.innerHTML=`<div class="image-chip"><img src="${pendingImage.dataUrl}" alt="${pendingImage.name}" /><span class="remove-chip material-symbols-rounded" id="removeImageChip">close</span></div>`;
+  imagePreviewRow.style.display="flex";
   document.getElementById("removeImageChip").onclick = clearPendingImage;
 }
-
-function clearPendingImage() {
-  pendingImage = null;
-  imageFileInput.value = "";
-  renderImagePreview();
-}
+function clearPendingImage() { pendingImage=null; imageFileInput.value=""; renderImagePreview(); }
 
 // CHAT UI HELPERS
 function addUserMessage(text, imageDataUrl) {
   hideWelcomeMessage();
-  const msg = document.createElement("div");
-  msg.className = "message";
-  const imgHtml = imageDataUrl
-    ? `<img class="attached-image" src="${imageDataUrl}" alt="attached image" />`
-    : "";
+  const msg = document.createElement("div"); msg.className="message";
+  const imgHtml = imageDataUrl ? `<img class="attached-image" src="${imageDataUrl}" alt="attached image" />` : "";
   msg.innerHTML = `<div class="user-bubble">${imgHtml}${text}</div>`;
   chatContainer.appendChild(msg);
   chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
 }
+// ————————————————————————————————
+// DOT LOADER ANIMATION ENGINE
+// Shared across both main chat and multi-chat columns.
+// Call startDotLoader(containerEl) → returns a cancel fn.
+// ————————————————————————————————
+const MODE_TIME = 5000, TRANSITION_TIME = 1200;
+const CYCLE = MODE_TIME + TRANSITION_TIME + MODE_TIME + TRANSITION_TIME;
+const WAVE_X = [-12, 0, 12], WAVE_DURATION = 1100;
+const WAVE_DELAY = [0, 180, 360], WAVE_AMPLITUDE = 8;
+const RADIUS = 8;
+const BASE_ANGLE = [-Math.PI/2, Math.PI/6, Math.PI*5/6];
+const ANGULAR_VELOCITY = (2*Math.PI)/1500;
+
+function easeInOutCubic(t) { return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+function getDotBlend(elapsed) {
+  const t = elapsed % CYCLE;
+  if (t < MODE_TIME) return 0;
+  if (t < MODE_TIME + TRANSITION_TIME) return easeInOutCubic((t-MODE_TIME)/TRANSITION_TIME);
+  if (t < MODE_TIME + TRANSITION_TIME + MODE_TIME) return 1;
+  return 1 - easeInOutCubic((t-(MODE_TIME+TRANSITION_TIME+MODE_TIME))/TRANSITION_TIME);
+}
+
+function startDotLoader(loaderEl) {
+  const dotEls = loaderEl.querySelectorAll(".dot");
+  const start = performance.now();
+  let raf;
+  function frame(now) {
+    const elapsed = now - start;
+    const w = getDotBlend(elapsed);
+    const angle = ANGULAR_VELOCITY * elapsed;
+    const scale = 1 + 0.08 * 4 * w * (1-w);
+    dotEls.forEach((dot, i) => {
+      const phase = ((elapsed + WAVE_DELAY[i]) % WAVE_DURATION) / WAVE_DURATION;
+      const waveY = -WAVE_AMPLITUDE * (0.5 - 0.5 * Math.cos(2*Math.PI*phase));
+      const waveX = WAVE_X[i];
+      const circleX = RADIUS * Math.cos(angle + BASE_ANGLE[i]);
+      const circleY = RADIUS * Math.sin(angle + BASE_ANGLE[i]);
+      const x = waveX + (circleX - waveX) * w;
+      const y = waveY + (circleY - waveY) * w;
+      dot.style.transform = `translate(-50%,-50%) translate(${x}px,${y}px) scale(${scale})`;
+    });
+    raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+  return () => cancelAnimationFrame(raf);
+}
+
+const DOT_LOADER_HTML = `<div class="dot-loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
 
 function addThinkingMessage() {
-  const msg = document.createElement("div");
-  msg.className = "message";
-  msg.innerHTML = `
-    <div class="ai-bubble">
-      <div class="thinking-bar">
-        <div class="bar-fill"></div>
-      </div>
-    </div>`;
-  chatContainer.appendChild(msg);
-  chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
+  const msg = document.createElement("div"); msg.className="message";
+  msg.innerHTML=`<div class="ai-bubble">${DOT_LOADER_HTML}</div>`;
+  chatContainer.appendChild(msg); chatContainer.parentElement.scrollTop=chatContainer.parentElement.scrollHeight;
+  const cancel = startDotLoader(msg.querySelector(".dot-loader"));
+  msg._cancelLoader = cancel;
   return msg;
 }
-
 function switchToCodestarting(msgElement) {
-  msgElement.innerHTML = `
-    <div class="ai-bubble codestarting-wrap">
-      <div class="codestart-cube">
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
-      </div>
-      <span class="codestart-text">Codestarting</span>
-    </div>`;
-  chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
+  // The dot loader already looks great for codestarting — just let it keep running.
+  // (This function is kept so existing setTimeout calls don't break.)
 }
 
-// ————————————————————————————————
-// LIGHTWEIGHT MARKDOWN + FADE-IN REVEAL
-// ————————————————————————————————
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
 
+// MARKDOWN + FADE-IN
+function escapeHtml(str) { return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function renderMarkdown(text) {
-  let safe = escapeHtml(text);
-  safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  safe = safe.replace(/__(.+?)__/g, "<strong>$1</strong>");
-  safe = safe.replace(/\*(.+?)\*/g, "<em>$1</em>");
-  safe = safe.replace(/`([^`]+?)`/g, "<code>$1</code>");
-  safe = safe.replace(/\n/g, "<br>");
-  return safe;
+  let s=escapeHtml(text);
+  s=s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  s=s.replace(/__(.+?)__/g,"<strong>$1</strong>");
+  s=s.replace(/\*(.+?)\*/g,"<em>$1</em>");
+  s=s.replace(/`([^`]+?)`/g,"<code>$1</code>");
+  s=s.replace(/\n/g,"<br>");
+  return s;
 }
-
-// Wraps each word in the rendered HTML with a staggered fade-in span, so
-// the reply visually reveals top-to-bottom as if it were streaming in.
 function applyFadeIn(container) {
-  let wordIndex = 0;
-  const STAGGER_MS = 22;
-
+  let idx=0; const STAGGER=22;
   function walk(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const tokens = node.textContent.split(/(\s+)/);
-      const frag = document.createDocumentFragment();
-      tokens.forEach(tok => {
-        if (tok === "") return;
-        if (/^\s+$/.test(tok)) {
-          frag.appendChild(document.createTextNode(tok));
-        } else {
-          const span = document.createElement("span");
-          span.className = "fade-word";
-          span.textContent = tok;
-          span.style.animationDelay = `${wordIndex * STAGGER_MS}ms`;
-          wordIndex++;
-          frag.appendChild(span);
-        }
+    if(node.nodeType===Node.TEXT_NODE){
+      const tokens=node.textContent.split(/(\s+)/);
+      const frag=document.createDocumentFragment();
+      tokens.forEach(tok=>{
+        if(tok==="")return;
+        if(/^\s+$/.test(tok)){frag.appendChild(document.createTextNode(tok));}
+        else{const span=document.createElement("span");span.className="fade-word";span.textContent=tok;span.style.animationDelay=`${idx*STAGGER}ms`;idx++;frag.appendChild(span);}
       });
-      node.parentNode.replaceChild(frag, node);
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      if (["STRONG", "EM", "CODE"].includes(node.tagName)) {
-        node.classList.add("fade-word");
-        node.style.animationDelay = `${wordIndex * STAGGER_MS}ms`;
-        wordIndex++;
-      } else {
-        Array.from(node.childNodes).forEach(walk);
-      }
+      node.parentNode.replaceChild(frag,node);
+    } else if(node.nodeType===Node.ELEMENT_NODE){
+      if(["STRONG","EM","CODE"].includes(node.tagName)){node.classList.add("fade-word");node.style.animationDelay=`${idx*STAGGER}ms`;idx++;}
+      else{Array.from(node.childNodes).forEach(walk);}
     }
   }
-
   Array.from(container.childNodes).forEach(walk);
 }
-
 function replaceThinkingWithReply(msgElement, text) {
-  msgElement.innerHTML = `<div class="ai-bubble"></div>`;
-  const bubble = msgElement.querySelector(".ai-bubble");
-  bubble.innerHTML = renderMarkdown(text);
-  applyFadeIn(bubble);
-  chatContainer.parentElement.scrollTop = chatContainer.parentElement.scrollHeight;
+  if (msgElement._cancelLoader) { msgElement._cancelLoader(); msgElement._cancelLoader = null; }
+  msgElement.innerHTML=`<div class="ai-bubble"></div>`;
+  const bubble=msgElement.querySelector(".ai-bubble");
+  bubble.innerHTML=renderMarkdown(text); applyFadeIn(bubble);
+  chatContainer.parentElement.scrollTop=chatContainer.parentElement.scrollHeight;
 }
 
-// --- SEND MESSAGE LOGIC ---
+// SEND MESSAGE
 async function sendMessage() {
-  const text = userInput.value.trim();
-  const image = pendingImage;
-  if ((!text && !image) || generationActive) return;
-
-  addUserMessage(text, image ? image.dataUrl : null);
-  userInput.value = "";
-  clearPendingImage();
-
-  sendBtn.style.display = "none";
-  stopBtn.style.display = "inline-flex";
-
-  generationActive = true;
-  abortController = new AbortController();
-
-  let thinkingMsg = addThinkingMessage();
-
-  // Only show "Codestarting" if the response is actually taking a while —
-  // this reflects a real cold start rather than always firing on message 1.
-  const codestartTimer = setTimeout(() => {
-    switchToCodestarting(thinkingMsg);
-  }, CODESTART_THRESHOLD_MS);
-
+  const text=userInput.value.trim(); const image=pendingImage;
+  if((!text&&!image)||generationActive)return;
+  addUserMessage(text,image?image.dataUrl:null); userInput.value=""; clearPendingImage();
+  sendBtn.style.display="none"; stopBtn.style.display="inline-flex";
+  generationActive=true; abortController=new AbortController();
+  let thinkingMsg=addThinkingMessage();
+  const codestartTimer=setTimeout(()=>switchToCodestarting(thinkingMsg),CODESTART_THRESHOLD_MS);
   try {
-    // Gemini-style parts array: text plus, if present, an inline_data image part.
-    // The base64 payload has the "data:image/...;base64," prefix stripped —
-    // your backend still needs to forward this part to the model API itself.
-    const parts = [];
-    if (text) parts.push({ text: text });
-    if (image) {
-      parts.push({
-        inline_data: {
-          mime_type: image.mimeType,
-          data: image.dataUrl.split(",")[1]
-        }
-      });
-    }
-
-    chatHistory.push({
-      role: "user",
-      parts: parts
+    const parts=[]; if(text)parts.push({text});
+    if(image)parts.push({inline_data:{mime_type:image.mimeType,data:image.dataUrl.split(",")[1]}});
+    chatHistory.push({role:"user",parts});
+    const res=await fetch(`${BACKEND_URL}/chat`,{
+      method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",
+      body:JSON.stringify({message:text,image:image?{mimeType:image.mimeType,data:image.dataUrl.split(",")[1]}:null,history:chatHistory,model:currentModel,conversation_id:currentConversationId}),
+      signal:abortController.signal
     });
-
-    const res = await fetch(`${BACKEND_URL}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        message: text,
-        image: image ? { mimeType: image.mimeType, data: image.dataUrl.split(",")[1] } : null,
-        history: chatHistory,
-        model: currentModel,
-        conversation_id: currentConversationId
-      }),
-      signal: abortController.signal
-    });
-
-    const data = await res.json();
-
+    const data=await res.json();
+    clearTimeout(codestartTimer); if(!generationActive)return;
+    if(data.conversation_id){const isNew=currentConversationId===null;currentConversationId=data.conversation_id;if(isNew)refreshHistoryList();}
+    if(data.reply){chatHistory.push({role:"model",parts:[{text:data.reply}]});replaceThinkingWithReply(thinkingMsg,data.reply);}
+    else{replaceThinkingWithReply(thinkingMsg,data.error||"Server Error: No reply.");}
+  } catch(err) {
     clearTimeout(codestartTimer);
-    if (!generationActive) return;
-
-    if (data.conversation_id) {
-      const isNewConversation = currentConversationId === null;
-      currentConversationId = data.conversation_id;
-      if (isNewConversation) refreshHistoryList();
-    }
-
-    if (data.reply) {
-      chatHistory.push({
-        role: "model",
-        parts: [{ text: data.reply }]
-      });
-      replaceThinkingWithReply(thinkingMsg, data.reply);
-    } else {
-      replaceThinkingWithReply(thinkingMsg, data.error || "Server Error: No reply.");
-    }
-  } catch (err) {
-    clearTimeout(codestartTimer);
-    if (err.name === "AbortError") {
-      replaceThinkingWithReply(thinkingMsg, "rReplay generation stopped.");
-    } else {
-      replaceThinkingWithReply(thinkingMsg, "Error contacting server. Please try again.");
-    }
+    if(err.name==="AbortError")replaceThinkingWithReply(thinkingMsg,"rReplay generation stopped.");
+    else replaceThinkingWithReply(thinkingMsg,"Error contacting server. Please try again.");
   }
-
-  generationActive = false;
-  sendBtn.style.display = "inline-flex";
-  stopBtn.style.display = "none";
+  generationActive=false; sendBtn.style.display="inline-flex"; stopBtn.style.display="none";
 }
+stopBtn.onclick=()=>{if(!generationActive||!abortController)return;generationActive=false;abortController.abort();sendBtn.style.display="inline-flex";stopBtn.style.display="none";};
+userInput.onkeydown=(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}};
+sendBtn.onclick=sendMessage;
 
-// STOP BUTTON
-stopBtn.onclick = () => {
-  if (!generationActive || !abortController) return;
-  generationActive = false;
-  abortController.abort();
-  sendBtn.style.display = "inline-flex";
-  stopBtn.style.display = "none";
-};
+// THEME
+const themeDarkBtn=document.getElementById("themeDarkBtn"),themeLightBtn=document.getElementById("themeLightBtn");
+function applyTheme(t){document.documentElement.setAttribute("data-theme",t);themeDarkBtn.classList.toggle("active",t==="dark");themeLightBtn.classList.toggle("active",t==="light");}
+themeDarkBtn.onclick=()=>applyTheme("dark"); themeLightBtn.onclick=()=>applyTheme("light");
 
-// INPUT HANDLERS
-userInput.onkeydown = (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-};
+// BACKGROUND TOGGLE
+const backgroundToggle=document.getElementById("backgroundToggle"),matrixCanvasEl=document.getElementById("matrixCanvas");
+backgroundToggle.addEventListener("change",()=>{if(window.setMatrixBackgroundEnabled)window.setMatrixBackgroundEnabled(backgroundToggle.checked);matrixCanvasEl.style.filter=backgroundToggle.checked?"blur(3px)":"none";});
 
-sendBtn.onclick = sendMessage;
-
-// THEME (Settings page)
-const themeDarkBtn = document.getElementById("themeDarkBtn");
-const themeLightBtn = document.getElementById("themeLightBtn");
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  themeDarkBtn.classList.toggle("active", theme === "dark");
-  themeLightBtn.classList.toggle("active", theme === "light");
-}
-
-themeDarkBtn.onclick = () => applyTheme("dark");
-themeLightBtn.onclick = () => applyTheme("light");
-
-// BACKGROUND TOGGLE (top bar)
-const backgroundToggle = document.getElementById("backgroundToggle");
-const matrixCanvasEl = document.getElementById("matrixCanvas");
-backgroundToggle.addEventListener("change", () => {
-  if (window.setMatrixBackgroundEnabled) {
-    window.setMatrixBackgroundEnabled(backgroundToggle.checked);
-  }
-  matrixCanvasEl.style.filter = backgroundToggle.checked ? "blur(3px)" : "none";
-});
-
-// ————————————————————————————————
-// ACCOUNT (Google sign-in) + CHAT HISTORY
-// ————————————————————————————————
-const accountBox = document.getElementById("accountBox");
-const headerSigninBtn = document.getElementById("headerSigninBtn");
-const historyHeading = document.getElementById("historyHeading");
-const historyList = document.getElementById("historyList");
-
+// ACCOUNT + HISTORY
+const accountBox=document.getElementById("accountBox"),headerSigninBtn=document.getElementById("headerSigninBtn");
+const historyHeading=document.getElementById("historyHeading"),historyList=document.getElementById("historyList");
 function renderAccountBox() {
-  if (!currentUser) {
-    headerSigninBtn.style.display = "flex";
-    accountBox.innerHTML = "";
-    return;
-  }
-
-  headerSigninBtn.style.display = "none";
-  accountBox.innerHTML = `
-    <div class="account-signed-in">
-      <img class="account-avatar" src="${currentUser.picture || ""}" alt="" />
-      <span class="account-name">${currentUser.name || currentUser.email}</span>
-      <span class="account-logout-btn material-symbols-rounded" id="logoutBtn" title="Sign out">logout</span>
-    </div>`;
-  document.getElementById("logoutBtn").onclick = async () => {
-    await fetch(`${BACKEND_URL}/auth/logout`, { method: "POST", credentials: "include" });
-    currentUser = null;
-    historyList.innerHTML = "";
-    historyHeading.style.display = "none";
-    renderAccountBox();
-  };
+  if(!currentUser){headerSigninBtn.style.display="flex";accountBox.innerHTML="";return;}
+  headerSigninBtn.style.display="none";
+  accountBox.innerHTML=`<div class="account-signed-in"><img class="account-avatar" src="${currentUser.picture||""}" alt="" /><span class="account-name">${currentUser.name||currentUser.email}</span><span class="account-logout-btn material-symbols-rounded" id="logoutBtn" title="Sign out">logout</span></div>`;
+  document.getElementById("logoutBtn").onclick=async()=>{await fetch(`${BACKEND_URL}/auth/logout`,{method:"POST",credentials:"include"});currentUser=null;historyList.innerHTML="";historyHeading.style.display="none";renderAccountBox();};
 }
-
 async function checkAuth() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/auth/me`, { credentials: "include" });
-    const data = await res.json();
-    currentUser = data.user || null;
-  } catch (e) {
-    currentUser = null;
-  }
-  renderAccountBox();
-  if (currentUser) refreshHistoryList();
+  try{const res=await fetch(`${BACKEND_URL}/auth/me`,{credentials:"include"});const data=await res.json();currentUser=data.user||null;}catch(e){currentUser=null;}
+  renderAccountBox(); if(currentUser)refreshHistoryList();
 }
-
 async function refreshHistoryList() {
-  if (!currentUser) return;
-  try {
-    const res = await fetch(`${BACKEND_URL}/conversations`, { credentials: "include" });
-    if (!res.ok) return;
-    const convos = await res.json();
-
-    historyHeading.style.display = convos.length ? "block" : "none";
-    historyList.innerHTML = "";
-
-    convos.forEach(c => {
-      const item = document.createElement("div");
-      item.className = "history-item" + (c.id === currentConversationId ? " active" : "");
-      item.textContent = c.title || "New Chat";
-      item.onclick = () => loadConversation(c.id);
+  if(!currentUser)return;
+  try{
+    const res=await fetch(`${BACKEND_URL}/conversations`,{credentials:"include"});if(!res.ok)return;
+    const convos=await res.json();
+    historyHeading.style.display=convos.length?"block":"none"; historyList.innerHTML="";
+    convos.forEach(c=>{
+      const item=document.createElement("div");
+      item.className="history-item"+(c.id===currentConversationId?" active":"");
+      item.textContent=c.title||"New Chat"; item.onclick=()=>loadConversation(c.id);
       historyList.appendChild(item);
     });
-  } catch (e) {
-    // Non-fatal — chat history is a convenience feature, not core functionality.
-  }
+  }catch(e){}
 }
-
 async function loadConversation(id) {
-  try {
-    const res = await fetch(`${BACKEND_URL}/conversations/${id}`, { credentials: "include" });
-    if (!res.ok) return;
-    const data = await res.json();
-
-    hideWelcomeMessage();
-    chatContainer.innerHTML = "";
-    chatHistory = [];
-    currentConversationId = data.id;
-
-    data.messages.forEach(m => {
-      chatHistory.push({ role: m.role, parts: m.parts });
-      const textPart = m.parts.find(p => p.text);
-      const imagePart = m.parts.find(p => p.inline_data);
-      const imageDataUrl = imagePart
-        ? `data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`
-        : null;
-
-      if (m.role === "user") {
-        addUserMessage(textPart ? textPart.text : "", imageDataUrl);
-      } else {
-        const msg = document.createElement("div");
-        msg.className = "message";
-        msg.innerHTML = `<div class="ai-bubble">${textPart ? renderMarkdown(textPart.text) : ""}</div>`;
-        chatContainer.appendChild(msg);
-      }
+  try{
+    const res=await fetch(`${BACKEND_URL}/conversations/${id}`,{credentials:"include"});if(!res.ok)return;
+    const data=await res.json();
+    hideWelcomeMessage(); chatContainer.innerHTML=""; chatHistory=[]; currentConversationId=data.id;
+    data.messages.forEach(m=>{
+      chatHistory.push({role:m.role,parts:m.parts});
+      const textPart=m.parts.find(p=>p.text),imagePart=m.parts.find(p=>p.inline_data);
+      const imageDataUrl=imagePart?`data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`:null;
+      if(m.role==="user"){addUserMessage(textPart?textPart.text:"",imageDataUrl);}
+      else{const msg=document.createElement("div");msg.className="message";msg.innerHTML=`<div class="ai-bubble">${textPart?renderMarkdown(textPart.text):""}</div>`;chatContainer.appendChild(msg);}
     });
-
-    document.querySelectorAll(".history-item").forEach(el => el.classList.remove("active"));
-    refreshHistoryList();
-    setActivePage("conversation");
-  } catch (e) {
-    // If loading fails, just leave the current view as-is.
-  }
+    document.querySelectorAll(".history-item").forEach(el=>el.classList.remove("active")); refreshHistoryList(); setActivePage("conversation");
+  }catch(e){}
 }
 
-// Show the welcome message on first load
 showWelcomeMessage();
 checkAuth();
+
+// MULTI-CHAT
+const AVAILABLE_MODELS = [
+  {key:"gemini",label:"GEMINI 2.5"},
+  {key:"llama3-70b",label:"LLAMA 3.3"},
+  {key:"gpt4o-mini",label:"CHATGPT 4o"},
+  {key:"deepseek-v4-flash",label:"DEEPSEEK V4"},
+  {key:"gemma3",label:"GEMMA 3"}
+];
+
+const mcChatCount=document.getElementById("mcChatCount"),mcModelPickers=document.getElementById("mcModelPickers");
+const mcStartBtn=document.getElementById("mcStartBtn"),multichatColumnsEl=document.getElementById("multichatColumns");
+const mcUserInput=document.getElementById("mcUserInput"),mcSendBtn=document.getElementById("mcSendBtn");
+const mcPlusBtn=document.getElementById("mcPlusBtn"),mcImageFileInput=document.getElementById("mcImageFileInput");
+const mcImagePreviewRow=document.getElementById("mcImagePreviewRow");
+let multichatColumnsState=[], mcPendingImage=null;
+
+function renderModelPickers(count) {
+  mcModelPickers.querySelectorAll(".mc-model-row").forEach(el=>el.remove());
+  for(let i=0;i<count;i++){
+    const row=document.createElement("div"); row.className="mc-model-row";
+    const def=AVAILABLE_MODELS[i%AVAILABLE_MODELS.length].key;
+    row.innerHTML=`<label>Chat ${i+1}</label><select class="mc-model-select">${AVAILABLE_MODELS.map(m=>`<option value="${m.key}"${m.key===def?" selected":""}>${m.label}</option>`).join("")}</select>`;
+    mcModelPickers.appendChild(row);
+  }
+}
+mcChatCount.addEventListener("change",()=>renderModelPickers(parseInt(mcChatCount.value,10)));
+renderModelPickers(parseInt(mcChatCount.value,10));
+
+mcStartBtn.onclick=()=>{
+  const models=Array.from(mcModelPickers.querySelectorAll(".mc-model-select")).map(s=>s.value);
+  buildMultichatColumns(models); setActivePage("multichat");
+};
+
+function buildMultichatColumns(models) {
+  multichatColumnsState=models.map(model=>({model,history:[],messagesEl:null}));
+  multichatColumnsEl.innerHTML="";
+  multichatColumnsState.forEach(col=>{
+    const info=AVAILABLE_MODELS.find(m=>m.key===col.model);
+    const colEl=document.createElement("div"); colEl.className="multichat-column";
+    colEl.innerHTML=`<div class="multichat-column-header">${info?info.label:col.model}</div><div class="multichat-column-messages"></div>`;
+    multichatColumnsEl.appendChild(colEl);
+    col.messagesEl=colEl.querySelector(".multichat-column-messages");
+  });
+}
+
+function mcAddUserMessage(container,text,imageDataUrl) {
+  const msg=document.createElement("div"); msg.className="message";
+  const imgHtml=imageDataUrl?`<img class="attached-image" src="${imageDataUrl}" alt="attached image" />`:"";
+  msg.innerHTML=`<div class="user-bubble">${imgHtml}${text}</div>`;
+  container.appendChild(msg); container.scrollTop=container.scrollHeight;
+}
+function mcAddThinkingMessage(container) {
+  const msg=document.createElement("div"); msg.className="message";
+  msg.innerHTML=`<div class="ai-bubble">${DOT_LOADER_HTML}</div>`;
+  container.appendChild(msg); container.scrollTop=container.scrollHeight;
+  msg._cancelLoader = startDotLoader(msg.querySelector(".dot-loader"));
+  return msg;
+}
+function mcSwitchToCodestarting(msgElement) {
+  // Dot loader already handles codestarting — no change needed.
+}
+function mcReplaceThinkingWithReply(msgElement,text,container) {
+  if (msgElement._cancelLoader) { msgElement._cancelLoader(); msgElement._cancelLoader = null; }
+  msgElement.innerHTML=`<div class="ai-bubble"></div>`;
+  const bubble=msgElement.querySelector(".ai-bubble");
+  bubble.innerHTML=renderMarkdown(text); applyFadeIn(bubble); container.scrollTop=container.scrollHeight;
+}
+
+mcPlusBtn.onclick=()=>mcImageFileInput.click();
+mcImageFileInput.addEventListener("change",(e)=>{
+  const file=e.target.files[0]; if(!file)return;
+  if(!file.type.startsWith("image/")){alert("Please choose an image file.");mcImageFileInput.value="";return;}
+  const reader=new FileReader();
+  reader.onload=()=>{mcPendingImage={dataUrl:reader.result,mimeType:file.type,name:file.name};mcRenderImagePreview();};
+  reader.readAsDataURL(file);
+});
+function mcRenderImagePreview() {
+  if(!mcPendingImage){mcImagePreviewRow.style.display="none";mcImagePreviewRow.innerHTML="";return;}
+  mcImagePreviewRow.innerHTML=`<div class="image-chip"><img src="${mcPendingImage.dataUrl}" alt="${mcPendingImage.name}" /><span class="remove-chip material-symbols-rounded" id="mcRemoveImageChip">close</span></div>`;
+  mcImagePreviewRow.style.display="flex";
+  document.getElementById("mcRemoveImageChip").onclick=()=>{mcPendingImage=null;mcImageFileInput.value="";mcRenderImagePreview();};
+}
+
+async function sendToColumn(col,text,image) {
+  const thinkingMsg=mcAddThinkingMessage(col.messagesEl);
+  const timer=setTimeout(()=>mcSwitchToCodestarting(thinkingMsg),CODESTART_THRESHOLD_MS);
+  try{
+    const res=await fetch(`${BACKEND_URL}/chat`,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",
+      body:JSON.stringify({message:text,image:image?{mimeType:image.mimeType,data:image.dataUrl.split(",")[1]}:null,history:col.history,model:col.model,conversation_id:null,persist:false})});
+    const data=await res.json(); clearTimeout(timer);
+    if(data.reply){col.history.push({role:"model",parts:[{text:data.reply}]});mcReplaceThinkingWithReply(thinkingMsg,data.reply,col.messagesEl);}
+    else{mcReplaceThinkingWithReply(thinkingMsg,data.error||"Server Error: No reply.",col.messagesEl);}
+  }catch(err){clearTimeout(timer);mcReplaceThinkingWithReply(thinkingMsg,"Error contacting server. Please try again.",col.messagesEl);}
+}
+
+function sendMultiMessage() {
+  const text=mcUserInput.value.trim(); const image=mcPendingImage;
+  if((!text&&!image)||multichatColumnsState.length===0)return;
+  mcUserInput.value=""; mcPendingImage=null; mcRenderImagePreview();
+  const userParts=[]; if(text)userParts.push({text});
+  if(image)userParts.push({inline_data:{mime_type:image.mimeType,data:image.dataUrl.split(",")[1]}});
+  multichatColumnsState.forEach(col=>{
+    mcAddUserMessage(col.messagesEl,text,image?image.dataUrl:null);
+    col.history.push({role:"user",parts:userParts});
+    sendToColumn(col,text,image);
+  });
+}
+mcSendBtn.onclick=sendMultiMessage;
+mcUserInput.onkeydown=(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMultiMessage();}};
 </script>
 </body>
 </html>
