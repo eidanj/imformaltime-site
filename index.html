@@ -13,6 +13,7 @@
   --bg-page: #000000;
   --bg-sidebar: rgba(10, 10, 10, 0.55);
   --bg-input: rgba(255, 255, 255, 0.04);
+  --bg-composer: rgba(15, 15, 15, 0.65);
   --brand-primary: #ffffff;
   --brand-primary-soft: rgba(255, 255, 255, 0.10);
   --on-brand: #000000;
@@ -25,11 +26,15 @@
   --radius-pill: 100px;
   --input-max-w: 760px;
   --code-bg: rgba(255, 255, 255, 0.08);
+  --input-gradient-color: rgba(0, 0, 0, 0.6);
+  --popup-bg: rgba(15, 15, 15, 0.95);
+  --popup-overlay: rgba(0, 0, 0, 0.6);
 }
 html[data-theme="light"] {
   --bg-page: #ffffff;
   --bg-sidebar: rgba(255, 255, 255, 0.65);
   --bg-input: rgba(0, 0, 0, 0.04);
+  --bg-composer: rgba(255, 255, 255, 0.70);
   --brand-primary: #000000;
   --brand-primary-soft: rgba(0, 0, 0, 0.08);
   --on-brand: #ffffff;
@@ -39,15 +44,18 @@ html[data-theme="light"] {
   --border-subtle: rgba(0, 0, 0, 0.10);
   --border-strong: rgba(0, 0, 0, 0.28);
   --code-bg: rgba(0, 0, 0, 0.06);
+  --input-gradient-color: rgba(255, 255, 255, 0.85);
+  --popup-bg: rgba(255, 255, 255, 0.96);
+  --popup-overlay: rgba(0, 0, 0, 0.35);
 }
 html[data-theme="light"] .header-bar { background: rgba(255,255,255,0.55); }
-html[data-theme="light"] .composer { background: rgba(255,255,255,0.65); }
 html[data-theme="light"] .model-dropdown-menu { background: rgba(255,255,255,0.92); }
 html[data-theme="light"] .model-dropdown-toggle { background: rgba(0,0,0,0.03); }
 html[data-theme="light"] .user-bubble { background: rgba(0,0,0,0.05); }
-html[data-theme="light"] .input-region { background: linear-gradient(to top,rgba(255,255,255,0.75) 60%,transparent); }
 html[data-theme="light"] #stopBtn { background: #1a1a1a; color: #fff; }
 html[data-theme="light"] #sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.08); }
+html[data-theme="light"] .pro-card { box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+html[data-theme="light"] .account-dropdown { box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 html[data-theme="light"] .multichat-column-header { color: var(--text-med); }
 
 * { margin:0; padding:0; box-sizing:border-box; font-family:"Google Sans",sans-serif; }
@@ -126,6 +134,20 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
 }
 .header-signin-btn:hover { background:var(--brand-primary-soft); }
 
+/* LIMIT BANNER */
+.mc-limit-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 20px;
+  font-size: 0.78rem;
+  color: var(--text-med);
+  background: rgba(248, 113, 113, 0.08);
+  border-bottom: 1px solid rgba(248, 113, 113, 0.2);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
 /* BACKGROUND TOGGLE */
 .bg-toggle { display:flex; align-items:center; gap:10px; cursor:pointer; color:var(--text-med); font-size:0.85rem; user-select:none; }
 .toggle-switch { position:relative; display:inline-block; width:40px; height:22px; flex-shrink:0; }
@@ -137,10 +159,11 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
 
 /* PAGE SYSTEM */
 .page { flex:1; display:none; overflow-y:auto; height:calc(100vh - 64px); padding:32px; }
-.page.active { display:block; }
+.page.active { display:flex; flex-direction:column; }
 
 /* CONVERSATION PAGE */
-#conversationPage { display:flex; flex-direction:column; height:calc(100vh - 64px); }
+#conversationPage { padding:0; }
+#conversationPage.active { display:flex; flex-direction:column; height:calc(100vh - 64px); }
 #chat-scroller { flex:1; display:flex; justify-content:center; overflow-y:auto; padding:32px 0 24px; }
 #chat-container { width:100%; max-width:var(--input-max-w); padding:0 24px; }
 .message { margin-bottom:28px; }
@@ -190,12 +213,12 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
 
 /* INPUT REGION — shared by conversation AND multi-chat */
 .input-region {
-  padding:24px; background:linear-gradient(to top,rgba(0,0,0,0.6) 60%,transparent);
+  padding:24px; background:linear-gradient(to top,var(--input-gradient-color) 60%,transparent);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
 }
 .composer {
   width:100%; max-width:var(--input-max-w);
-  background:rgba(15,15,15,0.65); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  background:var(--bg-composer); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
   border-radius:28px; padding:12px 16px; border:1px solid var(--border-subtle);
   display:flex; flex-direction:column; gap:12px;
 }
@@ -251,6 +274,359 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
 .swatch-light { background:linear-gradient(135deg,#ffffff 0%,#d8d8d8 100%); }
 .settings-hint { margin-top:14px; font-size:0.8rem; color:var(--text-low); max-width:480px; }
 
+/* ————————————————
+   SIGN-IN POPUP
+——————————————— */
+.signin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--popup-overlay);
+  backdrop-filter: blur(6px);
+}
+
+.signin-popup {
+  background: var(--popup-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+
+.signin-popup-icon {
+  font-size: 36px;
+  color: var(--text-med);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.signin-popup h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-high);
+  margin-bottom: 8px;
+}
+
+.signin-popup p {
+  font-size: 0.88rem;
+  color: var(--text-med);
+  line-height: 1.55;
+  margin-bottom: 22px;
+  max-width: none;
+}
+
+.signin-popup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-primary);
+  color: var(--on-brand);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.signin-popup-btn:hover { opacity: 0.88; }
+
+.signin-popup-dismiss {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: var(--text-low);
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: "Google Sans", sans-serif;
+  transition: 0.15s;
+}
+
+.signin-popup-dismiss:hover { color: var(--text-med); }
+
+/* ————————————————
+   ACCOUNT DROPDOWN
+——————————————— */
+.account-signed-in {
+  position: relative;
+}
+
+.account-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+  min-width: 180px;
+}
+
+.account-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  font-size: 0.875rem;
+  color: var(--text-high);
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.account-dropdown-item .material-symbols-rounded {
+  font-size: 18px;
+  color: var(--text-med);
+}
+
+.account-dropdown-item:hover {
+  background: var(--brand-primary-soft);
+}
+
+.account-dropdown-logout {
+  color: var(--text-med);
+}
+
+.account-dropdown-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 2px 0;
+}
+
+/* ————————————————
+   PRO NAV LINK — hidden in sidebar, accessed via account dropdown
+——————————————— */
+#navPro { display: none; }
+
+/* ————————————————
+   PRO PAGE
+——————————————— */
+#proPage {
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 32px;
+  overflow-y: auto;
+}
+
+.pro-card {
+  width: 100%;
+  max-width: 900px;
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  padding: 32px;
+  display: grid;
+  grid-template-columns: minmax(0,1.5fr) minmax(0,1fr);
+  gap: 28px;
+}
+
+.pro-left {}
+
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-primary-soft);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-med);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+}
+
+.pro-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-high);
+}
+
+.pro-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--text-high);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.pro-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-med);
+  line-height: 1.6;
+  max-width: 420px;
+  margin-bottom: 24px;
+}
+
+.pro-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pro-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--text-med);
+  line-height: 1.5;
+}
+
+.pro-feature strong {
+  color: var(--text-high);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.pro-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand-primary-soft);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-high);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pro-right {
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 28px;
+}
+
+.pro-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pro-price {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-high);
+  letter-spacing: -0.02em;
+}
+
+.pro-period {
+  font-size: 0.9rem;
+  color: var(--text-low);
+}
+
+.pro-trial {
+  font-size: 0.82rem;
+  color: var(--text-med);
+  margin-bottom: 18px;
+}
+
+.pro-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0 0 16px;
+}
+
+.pro-note {
+  font-size: 0.78rem;
+  color: var(--text-low);
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+.pro-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-primary);
+  color: var(--on-brand);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+  letter-spacing: 0.01em;
+}
+
+.pro-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.pro-secure-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  font-size: 0.72rem;
+  color: var(--text-low);
+}
+
+.pro-secure-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--text-med);
+  flex-shrink: 0;
+}
+
+.pro-footer {
+  margin-top: 10px;
+  font-size: 0.72rem;
+  color: var(--text-low);
+  line-height: 1.5;
+}
+
+.pro-danger {
+  color: #f87171;
+  font-weight: 600;
+}
+
+/* Pro page responsive */
+@media (max-width: 768px) {
+  .pro-card {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+  .pro-right {
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+    padding-left: 0;
+    padding-top: 22px;
+  }
+}
+
 /* MULTI-CHAT SETUP */
 .mc-select { height:42px; padding:0 14px; border-radius:var(--radius-md); border:1px solid var(--border-strong); background:rgba(255,255,255,0.03); color:var(--text-high); font-size:0.9rem; cursor:pointer; }
 .mc-model-row { display:flex; align-items:center; gap:12px; margin-top:10px; }
@@ -261,7 +637,7 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
 
 /* MULTI-CHAT SPLIT VIEW */
 #multichatPage { padding:0; }
-#multichatPage.active { display:flex; flex-direction:column; height:calc(100vh - 64px); }
+#multichatPage.active { display:flex; flex-direction:column; }
 .multichat-columns { flex:1; display:flex; flex-direction:row; overflow-x:auto; overflow-y:hidden; min-height:0; }
 .multichat-column { flex:1; min-width:240px; display:flex; flex-direction:column; border-right:1px solid var(--border-subtle); overflow:hidden; }
 .multichat-column:last-child { border-right:none; }
@@ -323,6 +699,11 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
         <span class="material-symbols-rounded">view_column</span>
         <span class="nav-text">Multi-Chat</span>
       </div>
+
+      <div class="nav-link nav-link-pro" id="navPro">
+        <span class="material-symbols-rounded">bolt</span>
+        <span class="nav-text">Upgrade to Pro</span>
+      </div>
       <div class="history-heading nav-text" id="historyHeading">Chat History</div>
       <div id="historyList"></div>
     </div>
@@ -360,6 +741,13 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
         </a>
       </div>
     </header>
+
+    <!-- MULTI-CHAT LIMIT BANNER — shown when the free limit is hit -->
+    <div class="mc-limit-banner" id="mcLimitBanner" style="display:none;">
+      <span class="material-symbols-rounded" style="font-size:16px;flex-shrink:0;">timer</span>
+      <span id="mcLimitBannerText"></span>
+      <a onclick="setActivePage('pro')" style="cursor:pointer;color:var(--text-high);font-weight:700;margin-left:6px;text-decoration:underline;">Upgrade to Pro</a>
+    </div>
 
     <!-- CONVERSATION PAGE -->
     <section class="page active" id="conversationPage">
@@ -444,6 +832,62 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
             <button id="mcSendBtn" class="material-symbols-rounded">send</button>
           </div>
         </div>
+        <p class="disclaimer" id="mcUsageHint"></p>
+      </div>
+    </section>
+    <section class="page" id="proPage">
+      <div class="pro-card">
+
+        <!-- LEFT: features -->
+        <div class="pro-left">
+          <div class="pro-badge">
+            <span class="pro-badge-dot"></span>
+            rReplay Pro · Experimental
+          </div>
+          <h1 class="pro-title">Upgrade to rReplay Pro</h1>
+          <p class="pro-subtitle">Better models, unlimited multi-chats, and priority access to Alpha and Beta features.</p>
+
+          <div class="pro-features">
+            <div class="pro-feature">
+              <div class="pro-check">✓</div>
+              <div><strong>Unlimited Multi-Chat</strong><br />Use Multi-Chat freely. Also unlocks direct messaging — after a broadcast, reply to any individual AI in its column.</div>
+            </div>
+            <div class="pro-feature">
+              <div class="pro-check">✓</div>
+              <div><strong>Better & Smarter Models</strong><br />Get faster, more capable models for chat and multi-chat.</div>
+            </div>
+            <div class="pro-feature">
+              <div class="pro-check">✓</div>
+              <div><strong>Early Access Features</strong><br />Try Alpha and Beta features before they launch.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: pricing -->
+        <div class="pro-right">
+          <div class="pro-price-row">
+            <span class="pro-price">$5</span>
+            <span class="pro-period">/ month</span>
+          </div>
+          <div class="pro-trial">3‑day free trial · cancel anytime</div>
+
+          <div class="pro-divider"></div>
+
+          <p class="pro-note">You'll start a free trial first. If you keep your subscription after the trial, Stripe will charge your saved payment method automatically — no extra steps.</p>
+
+          <a class="pro-btn" href="https://buy.stripe.com/test_aFafZj9TQ8WTdVh8DL9oc00" target="_blank">
+            <span>⚡</span>
+            Start free trial with Stripe
+          </a>
+
+          <div class="pro-secure-row">
+            <div class="pro-secure-dot">✓</div>
+            Secure payments powered by Stripe.
+          </div>
+
+          <p class="pro-footer">You can pause or cancel anytime. If your free trial ends without a valid payment method, your access will <span class="pro-danger">auto‑cancel</span>.</p>
+        </div>
+
       </div>
     </section>
 
@@ -468,68 +912,104 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--bg-page); c
     <!-- ABOUT / TERMS -->
     <section class="page" id="aboutPage">
       <h1>TERMS OF SERVICE</h1>
-      <p>**Acceptance of Terms  
-By accessing or using rReplay (the "Service"), you agree to these Terms of Service. If you do not agree, do not use the Service.**
+      <p>1. Acceptance of Terms
+By accessing or using rReplay (the "Service"), you agree to these Terms of Service. If you do not agree, do not use the Service.
 
-2. Eligibility  
+2. Eligibility
 You must be at least 13 years old to use the Service. If you are under 18, you need permission from a parent or legal guardian.
 
-3. Accounts & Authentication  
-You may create an account using Google Sign-In.  
-You agree to provide accurate information and keep your account secure.  
-You are responsible for all activity that occurs under your account.  
-We may suspend or terminate accounts that violate these Terms.
+3. Accounts &amp; Authentication
+You can create an account using Google Sign-In.
+You agree to provide accurate information and keep your account secure.
+You are responsible for all activity that occurs under your account.
+We may suspend or end accounts that violate these Terms.
 
-4. Use of the Service  
-You agree not to use the Service to:  
-- break any laws  
-- harm, threaten, or harass others  
-- attempt to hack, overload, or disrupt the Service  
-- reverse-engineer or misuse our AI models  
-- upload illegal or harmful content  
+4. Use of the Service
+You agree not to use the Service to:
+- break any laws
+- harm, threaten, or harass others
+- attempt to hack, overload, or disrupt the Service
+- reverse-engineer or misuse our AI models
+- upload illegal or harmful content
 
 We may limit usage to prevent abuse or protect system stability.
 
-5. AI Output Disclaimer  
-The Service uses AI models to generate responses.  
-AI output may be inaccurate, incomplete, offensive, or unexpected.  
-You agree not to rely on AI output for legal, medical, financial, or safety-critical decisions.  
+Subscription Terms
+
+5. Subscription Access &amp; Eligibility
+By purchasing a subscription to rReplay AI, you can access premium AI features, tools, and services for the duration of your active billing period.
+You must be at least 13 years old and legally able to enter into agreements in your region.
+Access to subscription features begins only after successful payment through Stripe.
+
+6. Billing &amp; Payment Authorization
+You authorize Stripe to automatically charge the payment method you provide at checkout for recurring subscription fees.
+Charges occur at the start of each billing cycle unless canceled beforehand.
+All payments are processed securely through Stripe.
+Failure to maintain a valid payment method may lead to suspension or cancellation of your subscription.
+
+7. Free Trials
+If a free trial is offered, it begins immediately upon registration and lasts for the stated trial period.
+At the end of the trial, your subscription automatically converts to a paid plan unless canceled before the trial ends.
+A valid payment method may be needed to activate the trial.
+
+8. Cancellation &amp; Refunds
+You may cancel your subscription at any time through your account dashboard or the Stripe Billing Portal.
+Cancellation stops future charges but does not refund past payments.
+Refunds are not provided for partial billing periods, unused time, or accidental purchases unless required by law.
+
+9. Subscription Changes
+We may change subscription pricing, features, or plan structures at any time.
+You will be notified of changes in advance.
+Continued use of the Service after changes means you accept the updated terms.
+
+10. Account Responsibility
+You are responsible for keeping your account credentials and payment information secure.
+rReplay AI is not responsible for unauthorized access due to your failure to secure your account.
+
+11. Service Availability (General + Subscription)
+Both free and subscription features are provided "as-is" and "as-available."
+We may update, modify, or remove features at any time.
+We are not liable for downtime, interruptions, or data loss caused by maintenance, updates, or third-party service issues.
+
+General Platform Terms
+
+12. AI Output Disclaimer
+The Service uses AI models to generate responses.
+AI output may be inaccurate, incomplete, offensive, or unexpected.
+Do not rely on AI output for legal, medical, financial, or safety-critical decisions.
 You are responsible for how you use the generated content.
 
-6. User Content  
-You keep ownership of the content you submit.  
-By using the Service, you allow us to store and process your content to provide the Service.  
+13. User Content
+You retain ownership of the content you submit.
+By using the Service, you give us permission to store and process your content to provide the Service.
 We do not sell your data.
 
-7. Privacy  
-Your use of the Service is also governed by our Privacy Policy.  
-We use cookies to maintain login sessions (for example, session_token).
+14. Privacy
+Your use of the Service is governed by our Privacy Policy.
+We use cookies to maintain login sessions (e.g., session_token).
 
-8. Rate Limits & Fair Use  
-We may apply rate limits or usage restrictions to ensure stable operation.  
+15. Rate Limits &amp; Fair Use
+We may apply rate limits or usage restrictions to ensure stable operation.
 Excessive or automated usage may result in temporary or permanent suspension.
 
-9. Service Availability  
-We may update, modify, or discontinue parts of the Service at any time.  
-We are not responsible for downtime, data loss, or service interruptions.
-
-10. Third-Party Services  
-The Service integrates with third-party APIs (Google, OpenAI, Groq, DeepSeek, Gemini).  
+16. Third-Party Services
+The Service connects with third-party APIs (Google, OpenAI, Groq, DeepSeek, Gemini).
 Their terms also apply when you use features powered by those services.
 
-11. Termination  
-We may suspend or terminate your access if you violate these Terms.  
+17. Termination
+We may suspend or end your access or subscription if you violate these Terms, misuse the platform, commit fraud, or fail to pay.
 You may stop using the Service at any time.
+Upon termination, access to subscription features is revoked immediately.
 
-12. Limitation of Liability  
-To the fullest extent permitted by law, we are not liable for any damages resulting from your use of the Service.  
-The Service is provided "as is" without warranties of any kind.
+18. Limitation of Liability
+To the fullest extent permitted by law, we are not liable for any damages resulting from your use of the Service.
+The Service is provided "as-is" without warranties of any kind.
 
-13. Changes to Terms  
-We may update these Terms at any time.  
+19. Changes to Terms
+We may update these Terms at any time.
 Continued use of the Service means you accept the updated Terms.
 
-14. Contact  
+20. Contact
 If you have questions about these Terms, contact us at: eidanplaz@gmail.com</p>
     </section>
 
@@ -633,6 +1113,7 @@ const toggleSidebarBtn = document.getElementById("toggleSidebar");
 const navNewChat = document.getElementById("navNewChat");
 const navConversation = document.getElementById("navConversation");
 const navMultiChat = document.getElementById("navMultiChat");
+const navPro = document.getElementById("navPro");
 const navSettings = document.getElementById("navSettings");
 const navAbout = document.getElementById("navAbout");
 
@@ -641,6 +1122,7 @@ const settingsPage = document.getElementById("settingsPage");
 const aboutPage = document.getElementById("aboutPage");
 const multichatSetupPage = document.getElementById("multichatSetupPage");
 const multichatPage = document.getElementById("multichatPage");
+const proPage = document.getElementById("proPage");
 
 const modelDropdown = document.getElementById("modelDropdown");
 const modelDropdownToggle = document.getElementById("modelDropdownToggle");
@@ -674,8 +1156,8 @@ function hideWelcomeMessage() { const el=document.getElementById("welcomeMessage
 
 // PAGE SWITCHER
 function setActivePage(page) {
-  [conversationPage,settingsPage,aboutPage,multichatSetupPage,multichatPage].forEach(p=>p.classList.remove("active"));
-  [navNewChat,navConversation,navMultiChat,navSettings,navAbout].forEach(n=>n.classList.remove("active"));
+  [conversationPage,settingsPage,aboutPage,multichatSetupPage,multichatPage,proPage].forEach(p=>p.classList.remove("active"));
+  [navNewChat,navConversation,navMultiChat,navPro,navSettings,navAbout].forEach(n=>n.classList.remove("active"));
   const inputRegion = document.querySelector("#conversationPage .input-region");
   const chatScroller = document.getElementById("chat-scroller");
   inputRegion.style.display = "none";
@@ -685,8 +1167,9 @@ function setActivePage(page) {
     inputRegion.style.display = "flex"; chatScroller.style.display = "flex";
   } else if (page === "settings") { settingsPage.classList.add("active"); navSettings.classList.add("active");
   } else if (page === "about") { aboutPage.classList.add("active"); navAbout.classList.add("active");
-  } else if (page === "multichatSetup") { multichatSetupPage.classList.add("active"); navMultiChat.classList.add("active");
-  } else if (page === "multichat") { multichatPage.classList.add("active"); navMultiChat.classList.add("active"); }
+  } else if (page === "multichatSetup") { multichatSetupPage.classList.add("active"); navMultiChat.classList.add("active"); setTimeout(updateLimitBanner, 0);
+  } else if (page === "multichat") { multichatPage.classList.add("active"); navMultiChat.classList.add("active"); setTimeout(updateMcUsageHint, 0);
+  } else if (page === "pro") { proPage.classList.add("active"); navPro.classList.add("active"); }
 }
 
 // SIDEBAR NAV
@@ -696,7 +1179,12 @@ navNewChat.onclick = () => {
   showWelcomeMessage(); setActivePage("conversation");
 };
 navConversation.onclick = () => setActivePage("conversation");
-navMultiChat.onclick = () => setActivePage("multichatSetup");
+navMultiChat.onclick = () => {
+  if (!currentUser) { showSigninPopup(); return; }
+  updateLimitBanner();
+  setActivePage("multichatSetup");
+};
+navPro.onclick = () => setActivePage("pro");
 navSettings.onclick = () => setActivePage("settings");
 navAbout.onclick = () => setActivePage("about");
 
@@ -904,15 +1392,113 @@ backgroundToggle.addEventListener("change",()=>{if(window.setMatrixBackgroundEna
 // ACCOUNT + HISTORY
 const accountBox=document.getElementById("accountBox"),headerSigninBtn=document.getElementById("headerSigninBtn");
 const historyHeading=document.getElementById("historyHeading"),historyList=document.getElementById("historyList");
+// ————————————————————————————————
+// SIGN-IN POPUP (shown when unauthenticated user tries Multi-Chat)
+// ————————————————————————————————
+function showSigninPopup() {
+  if (document.getElementById("signinPopupOverlay")) return;
+  const overlay = document.createElement("div");
+  overlay.id = "signinPopupOverlay";
+  overlay.className = "signin-overlay";
+  overlay.innerHTML = `
+    <div class="signin-popup">
+      <span class="signin-popup-icon material-symbols-rounded">lock</span>
+      <h2>Sign in to use Multi-Chat</h2>
+      <p>Multi-Chat requires an account so we can track your free usage. Sign in with Google to continue.</p>
+      <a href="${BACKEND_URL}/auth/google/login" class="signin-popup-btn">
+        <span class="material-symbols-rounded" style="font-size:18px;">login</span>
+        Log in / Sign up
+      </a>
+      <button class="signin-popup-dismiss" id="signinDismiss">Maybe later</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById("signinDismiss").onclick = () => overlay.remove();
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+}
+
+// ————————————————————————————————
+// LIMIT BANNER
+// ————————————————————————————————
+function updateLimitBanner() {
+  const banner = document.getElementById("mcLimitBanner");
+  const textEl = document.getElementById("mcLimitBannerText");
+  if (!banner || !textEl) return;
+
+  if (!currentUser || mcFreeUsesLeft() > 0) {
+    banner.style.display = "none";
+    return;
+  }
+
+  // Find when the oldest send in the window will expire
+  const oldest = mcSendLog.length > 0 ? Math.min(...mcSendLog) : Date.now();
+  const expiresAt = new Date(oldest + MC_WINDOW_MS);
+  const timeStr = expiresAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  textEl.textContent = `You've hit your Multi-Chat limit. Upgrade or wait until ${timeStr} to continue.`;
+  banner.style.display = "flex";
+}
+
+// ————————————————————————————————
+// ACCOUNT BOX — custom dropdown with Subscription option
+// ————————————————————————————————
 function renderAccountBox() {
-  if(!currentUser){headerSigninBtn.style.display="flex";accountBox.innerHTML="";return;}
-  headerSigninBtn.style.display="none";
-  accountBox.innerHTML=`<div class="account-signed-in"><img class="account-avatar" src="${currentUser.picture||""}" alt="" /><span class="account-name">${currentUser.name||currentUser.email}</span><span class="account-logout-btn material-symbols-rounded" id="logoutBtn" title="Sign out">logout</span></div>`;
-  document.getElementById("logoutBtn").onclick=async()=>{await fetch(`${BACKEND_URL}/auth/logout`,{method:"POST",credentials:"include"});currentUser=null;historyList.innerHTML="";historyHeading.style.display="none";renderAccountBox();};
+  if (!currentUser) {
+    headerSigninBtn.style.display = "flex";
+    accountBox.innerHTML = "";
+    return;
+  }
+
+  headerSigninBtn.style.display = "none";
+  accountBox.innerHTML = `
+    <div class="account-signed-in" id="accountTrigger" style="cursor:pointer;" title="Account options">
+      <img class="account-avatar" src="${currentUser.picture || ""}" alt="" />
+      <span class="account-name">${currentUser.name || currentUser.email}</span>
+      <span class="material-symbols-rounded" style="font-size:18px;color:var(--text-low);">expand_more</span>
+    </div>
+    <div class="account-dropdown" id="accountDropdown" style="display:none;">
+      <div class="account-dropdown-item" id="accountDropdownPro">
+        <span class="material-symbols-rounded">bolt</span>Subscription
+      </div>
+      <div class="account-dropdown-divider"></div>
+      <div class="account-dropdown-item account-dropdown-logout" id="accountDropdownLogout">
+        <span class="material-symbols-rounded">logout</span>Sign out
+      </div>
+    </div>`;
+
+  const trigger = document.getElementById("accountTrigger");
+  const dropdown = document.getElementById("accountDropdown");
+
+  trigger.onclick = (e) => {
+    e.stopPropagation();
+    dropdown.style.display = dropdown.style.display === "none" ? "flex" : "none";
+  };
+
+  document.getElementById("accountDropdownPro").onclick = () => {
+    dropdown.style.display = "none";
+    setActivePage("pro");
+  };
+
+  document.getElementById("accountDropdownLogout").onclick = async () => {
+    dropdown.style.display = "none";
+    await fetch(`${BACKEND_URL}/auth/logout`, { method: "POST", credentials: "include" });
+    currentUser = null;
+    historyList.innerHTML = "";
+    historyHeading.style.display = "none";
+    renderAccountBox();
+  };
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", function closeDropdown(e) {
+    const dd = document.getElementById("accountDropdown");
+    if (dd && !accountBox.contains(e.target)) {
+      dd.style.display = "none";
+    }
+  }, { once: false });
 }
 async function checkAuth() {
   try{const res=await fetch(`${BACKEND_URL}/auth/me`,{credentials:"include"});const data=await res.json();currentUser=data.user||null;}catch(e){currentUser=null;}
-  renderAccountBox(); if(currentUser)refreshHistoryList();
+  renderAccountBox();
+  updateLimitBanner();
+  if(currentUser)refreshHistoryList();
 }
 async function refreshHistoryList() {
   if(!currentUser)return;
@@ -963,6 +1549,21 @@ const mcPlusBtn=document.getElementById("mcPlusBtn"),mcImageFileInput=document.g
 const mcImagePreviewRow=document.getElementById("mcImagePreviewRow");
 let multichatColumnsState=[], mcPendingImage=null;
 
+// Free tier: 10 multi-chat sends per 5 hours (stored in memory per session)
+const MC_FREE_LIMIT = 10;
+const MC_WINDOW_MS = 5 * 60 * 60 * 1000; // 5 hours
+let mcSendLog = []; // timestamps of sends in this session
+
+function mcFreeUsesLeft() {
+  const now = Date.now();
+  mcSendLog = mcSendLog.filter(t => now - t < MC_WINDOW_MS);
+  return Math.max(0, MC_FREE_LIMIT - mcSendLog.length);
+}
+
+function mcRecordSend() {
+  mcSendLog.push(Date.now());
+}
+
 function renderModelPickers(count) {
   mcModelPickers.querySelectorAll(".mc-model-row").forEach(el=>el.remove());
   for(let i=0;i<count;i++){
@@ -976,6 +1577,8 @@ mcChatCount.addEventListener("change",()=>renderModelPickers(parseInt(mcChatCoun
 renderModelPickers(parseInt(mcChatCount.value,10));
 
 mcStartBtn.onclick=()=>{
+  if (!currentUser) { showSigninPopup(); return; }
+  if (mcFreeUsesLeft() <= 0) { updateLimitBanner(); return; }
   const models=Array.from(mcModelPickers.querySelectorAll(".mc-model-select")).map(s=>s.value);
   buildMultichatColumns(models); setActivePage("multichat");
 };
@@ -1045,6 +1648,17 @@ async function sendToColumn(col,text,image) {
 function sendMultiMessage() {
   const text=mcUserInput.value.trim(); const image=mcPendingImage;
   if((!text&&!image)||multichatColumnsState.length===0)return;
+
+  // Must be signed in
+  if (!currentUser) { showSigninPopup(); return; }
+
+  // Free tier limit check
+  const usesLeft = mcFreeUsesLeft();
+  if (usesLeft <= 0) { updateLimitBanner(); return; }
+
+  mcRecordSend();
+  updateLimitBanner();
+  updateMcUsageHint();
   mcUserInput.value=""; mcPendingImage=null; mcRenderImagePreview();
   const userParts=[]; if(text)userParts.push({text});
   if(image)userParts.push({inline_data:{mime_type:image.mimeType,data:image.dataUrl.split(",")[1]}});
@@ -1056,6 +1670,16 @@ function sendMultiMessage() {
 }
 mcSendBtn.onclick=sendMultiMessage;
 mcUserInput.onkeydown=(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMultiMessage();}};
+
+function updateMcUsageHint() {
+  const hint = document.getElementById("mcUsageHint");
+  if (!hint) return;
+  if (!currentUser) { hint.textContent = ""; return; }
+  const left = mcFreeUsesLeft();
+  hint.innerHTML = left <= 3
+    ? `${left} free Multi-Chat message${left!==1?"s":""} remaining this window. <span style="cursor:pointer;text-decoration:underline;" onclick="setActivePage('pro')">Upgrade to Pro</span> for unlimited.`
+    : `${left} of ${MC_FREE_LIMIT} free Multi-Chat messages remaining (resets every 5 hours).`;
+}
 </script>
 </body>
 </html>
