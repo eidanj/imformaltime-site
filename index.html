@@ -1937,7 +1937,7 @@ mcUserInput.onkeydown=(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();
 function updateMcUsageHint() {
   const hint = document.getElementById("mcUsageHint");
   if (!hint) return;
-  if (!currentUser) { hint.textContent = ""; return; }
+  if (!currentUser || currentUser.is_pro) { hint.textContent = ""; return; }
   const left = mcFreeUsesLeft();
   hint.innerHTML = left <= 3
     ? `${left} free Multi-Chat message${left!==1?"s":""} remaining this window. <span style="cursor:pointer;text-decoration:underline;" onclick="setActivePage('pro')">Upgrade to Pro</span> for unlimited.`
